@@ -1,0 +1,88 @@
+@{
+    ViewData["Title"] = "Privacy Policy";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <h1 class="mb-4"><i class="bi bi-shield-lock"></i> Privacy Policy</h1>
+            <p class="text-muted">Last updated: @DateTime.UtcNow.ToString("dd MMM yyyy")</p>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h3>1. Information We Collect</h3>
+                    <p>We collect the following types of personal information:</p>
+                    <ul>
+                        <li><strong>Account Information:</strong> Name, email address, phone number, student/staff ID</li>
+                        <li><strong>Maintenance Request Data:</strong> Description of issues, location, photos, and status updates</li>
+                        <li><strong>Usage Data:</strong> Login times, actions performed, and pages visited</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h3>2. How We Use Your Information</h3>
+                    <p>Your information is used to:</p>
+                    <ul>
+                        <li>Process and respond to your maintenance requests</li>
+                        <li>Send notifications about request status updates</li>
+                        <li>Improve our services and user experience</li>
+                        <li>Maintain system security and prevent fraud</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h3>3. Data Protection</h3>
+                    <p>We implement industry-standard security measures including:</p>
+                    <ul>
+                        <li>Encrypted password storage using ASP.NET Core Identity</li>
+                        <li>HTTPS encryption for all data transmission</li>
+                        <li>Account lockout after 5 failed login attempts</li>
+                        <li>Secure cookie handling with HttpOnly and SameSite flags</li>
+                        <li>Regular security audits and updates</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h3>4. Your Rights (GDPR Compliance)</h3>
+                    <p>You have the right to:</p>
+                    <ul>
+                        <li><strong>Access:</strong> Request a copy of all your personal data</li>
+                        <li><strong>Rectification:</strong> Update or correct your information</li>
+                        <li><strong>Erasure:</strong> Request deletion of your account and data</li>
+                        <li><strong>Data Portability:</strong> Export your data in a machine-readable format</li>
+                    </ul>
+                    <p>To exercise these rights, visit your <a asp-controller="Account" asp-action="Profile">Profile</a> page or contact our Data Protection Officer.</p>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h3>5. Data Retention</h3>
+                    <p>We retain your data for as long as your account is active or as needed to provide services. You may request deletion of your account at any time through your profile settings.</p>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h3>6. Contact Us</h3>
+                    <p>If you have questions about this Privacy Policy, please contact:</p>
+                    <p><strong>ZEGU IT Department</strong><br />
+                    Email: support@zegu.ac.zw<br />
+                    Phone: +263-XXX-XXXX</p>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <a asp-controller="Account" asp-action="ExportMyData" class="btn btn-primary">
+                    <i class="bi bi-download"></i> Download My Data
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

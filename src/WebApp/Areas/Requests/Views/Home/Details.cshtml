@@ -1,0 +1,193 @@
+@model ZEGU.Core.Entities.Maintenance.MaintenanceRequest
+
+@{
+    ViewData["Title"] = $"Request {Model.RequestNumber}";
+}
+
+<div class="page-header">
+    <div>
+        <h2><i class="bi bi-file-earmark-text"></i> Request @Model.RequestNumber</h2>
+        <p class="page-subtitle">Request details and updates</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-action="MyRequests" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Back
+        </a>
+        @if (Model.Status == ZEGU.Core.Enums.MaintenanceRequestStatus.Submitted || Model.Status == ZEGU.Core.Enums.MaintenanceRequestStatus.Assigned)
+        {
+            <form method="post" asp-action="Cancel" asp-route-requestId="@Model.Id" style="display: inline;" onsubmit="return confirm('Are you sure you want to cancel this request?');">
+                <button type="submit" class="btn btn-danger">
+                    <i class="bi bi-x-circle"></i> Cancel Request
+                </button>
+            </form>
+        }
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5><i class="bi bi-info-circle"></i> Request Details</h5>
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-3">Request Number</dt>
+                    <dd class="col-sm-9"><strong>@Model.RequestNumber</strong></dd>
+
+                    <dt class="col-sm-3">Title</dt>
+                    <dd class="col-sm-9">@Model.Title</dd>
+
+                    <dt class="col-sm-3">Category</dt>
+                    <dd class="col-sm-9">@Model.Category.CategoryName</dd>
+
+                    <dt class="col-sm-3">Location</dt>
+                    <dd class="col-sm-9">@Model.Location.Building.BuildingName - Floor @Model.Location.Floor, Room @Model.Location.RoomNumber</dd>
+
+                    <dt class="col-sm-3">Priority</dt>
+                    <dd class="col-sm-9">
+                        <span class="badge priority-@Model.Priority.ToString().ToLower()">@Model.Priority</span>
+                    </dd>
+
+                    <dt class="col-sm-3">Status</dt>
+                    <dd class="col-sm-9">
+                        <span class="badge status-@Model.Status.ToString().ToLower()">@Model.Status</span>
+                    </dd>
+
+                    <dt class="col-sm-3">Description</dt>
+                    <dd class="col-sm-9">@Model.Description</dd>
+
+                    <dt class="col-sm-3">Submitted On</dt>
+                    <dd class="col-sm-9">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</dd>
+
+                    @if (Model.CompletedAt.HasValue)
+                    {
+                        <dt class="col-sm-3">Completed On</dt>
+                        <dd class="col-sm-9">@Model.CompletedAt.Value.ToString("dd/MM/yyyy HH:mm")</dd>
+                    }
+                </dl>
+            </div>
+        </div>
+
+        @if (Model.Status == ZEGU.Core.Enums.MaintenanceRequestStatus.Completed && Model.Feedback == null)
+        {
+            <div class="card mb-3 border-warning">
+                <div class="card-header bg-warning">
+                    <h5><i class="bi bi-star"></i> Provide Feedback</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" asp-action="SubmitFeedback" asp-route-requestId="@Model.Id">
+                        <div class="mb-3">
+                            <label class="form-label">Rating (1-5)</label>
+                            <select name="rating" class="form-select" required>
+                                <option value="5">5 - Excellent</option>
+                                <option value="4">4 - Good</option>
+                                <option value="3">3 - Average</option>
+                                <option value="2">2 - Poor</option>
+                                <option value="1">1 - Very Poor</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Comments (Optional)</label>
+                            <textarea name="comments" class="form-control" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Was the work satisfactory?</label>
+                            <select name="workSatisfactory" class="form-select">
+                                <option value="true">Yes</option>
+                                <option value="false">No</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Submit Feedback</button>
+                    </form>
+                </div>
+            </div>
+        }
+
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5><i class="bi bi-chat"></i> Comments</h5>
+            </div>
+            <div class="card-body">
+                @foreach (var comment in Model.Comments.Where(c => !c.IsInternal))
+                {
+                    <div class="border-bottom pb-2 mb-2">
+                        <strong>@comment.User.FirstName @comment.User.LastName</strong>
+                        <small class="text-muted">@comment.CreatedAt.ToString("dd/MM/yyyy HH:mm")</small>
+                        <p class="mb-0 mt-1">@comment.CommentText</p>
+                    </div>
+                }
+                <form method="post" asp-action="AddComment" asp-route-requestId="@Model.Id" class="mt-3">
+                    <div class="input-group">
+                        <input type="text" name="commentText" class="form-control" placeholder="Add a comment..." required />
+                        <button type="submit" class="btn btn-primary">Add</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        @if (Model.Assignments.Any())
+        {
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5><i class="bi bi-person-badge"></i> Assigned Technician</h5>
+                </div>
+                <div class="card-body">
+                    @foreach (var assignment in Model.Assignments)
+                    {
+                        <p><strong>@assignment.Technician.TechnicianType</strong></p>
+                        @if (!string.IsNullOrEmpty(assignment.Technician.User?.FirstName))
+                        {
+                            <p>@assignment.Technician.User.FirstName @assignment.Technician.User.LastName</p>
+                        }
+                    }
+                </div>
+            </div>
+        }
+
+        @if (Model.Attachments.Any())
+        {
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5><i class="bi bi-images"></i> Photos</h5>
+                </div>
+                <div class="card-body">
+                    @foreach (var attachment in Model.Attachments)
+                    {
+                        <div class="mb-2">
+                            <a href="@attachment.FilePath" target="_blank" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-image"></i> @attachment.FileName
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        @if (Model.StatusHistory.Any())
+        {
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="bi bi-clock-history"></i> History</h5>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        @foreach (var history in Model.StatusHistory.OrderBy(h => h.CreatedAt))
+                        {
+                            <div class="timeline-item">
+                                <div class="timeline-time">@history.CreatedAt.ToString("dd/MM/yyyy HH:mm")</div>
+                                <div class="timeline-content"><strong>@history.NewStatus</strong></div>
+                                @if (!string.IsNullOrEmpty(history.Comments))
+                                {
+                                    <div class="timeline-content text-muted small">@history.Comments</div>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

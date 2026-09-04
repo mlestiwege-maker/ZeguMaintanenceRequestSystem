@@ -1,0 +1,58 @@
+@model ZEGU.Core.Entities.Shared.Building
+
+@{
+    ViewData["Title"] = "Edit Building";
+}
+
+<div class="page-header">
+    <div>
+        <h2><i class="bi bi-building"></i> Edit Building</h2>
+        <p class="page-subtitle">Update building information</p>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <form method="post" asp-action="Edit">
+                    <input type="hidden" asp-for="Id" />
+                    <input type="hidden" asp-for="IsActive" />
+                    <div class="mb-3">
+                        <label class="form-label">Campus</label>
+                        <select name="campusId" class="form-select" required>
+                            @foreach (var campus in ViewBag.Campuses as List<ZEGU.Core.Entities.Shared.Campus>)
+                            {
+                                <option value="@campus.Id" selected="@(Model.CampusId == campus.Id ? "selected" : null)">@campus.CampusName</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Building Name</label>
+                        <input asp-for="BuildingName" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Code</label>
+                        <input asp-for="Code" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Floors</label>
+                        <input asp-for="Floors" type="number" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                    </div>
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg"></i> Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

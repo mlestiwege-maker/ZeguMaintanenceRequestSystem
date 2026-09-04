@@ -1,0 +1,57 @@
+@{
+    ViewData["Title"] = "Create Technician";
+}
+
+<div class="page-header">
+    <div>
+        <h2><i class="bi bi-wrench"></i> Create Technician</h2>
+        <p class="page-subtitle">Add a new maintenance technician</p>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <form method="post" asp-action="Create">
+                    <div class="mb-3">
+                        <label class="form-label required-field">User</label>
+                        <select name="userId" class="form-select" required>
+                            <option value="">-- Select User --</option>
+                            @foreach (var user in ViewBag.Users)
+                            {
+                                <option value="@user.Id">@user.FirstName @user.LastName (@user.UserName)</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label required-field">Technician Type</label>
+                        <select name="technicianType" class="form-select" required>
+                            <option value="">-- Select Type --</option>
+                            @foreach (var type in ViewBag.Types)
+                            {
+                                <option value="@((int)type)">@type</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Specialization</label>
+                        <input name="specialization" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Phone Number</label>
+                        <input name="phoneNumber" class="form-control" />
+                    </div>
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-wrench"></i> Create Technician
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

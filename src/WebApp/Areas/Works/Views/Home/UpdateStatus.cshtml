@@ -1,0 +1,96 @@
+@model ZEGU.Core.Entities.Maintenance.MaintenanceRequest
+
+@{
+    ViewData["Title"] = "Update Status";
+}
+
+<div class="page-header">
+    <div>
+        <h2><i class="bi bi-arrow-repeat"></i> Update Request Status</h2>
+        <p class="page-subtitle">Change the current status of this request</p>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <strong>Request:</strong> @Model.RequestNumber<br />
+                    <strong>Title:</strong> @Model.Title<br />
+                    <strong>Current Status:</strong> <span class="badge status-@Model.Status.ToString().ToLower()">@Model.Status</span>
+                </div>
+
+                <form method="post" asp-action="UpdateStatus" enctype="multipart/form-data">
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-3">
+                        <label class="form-label">New Status</label>
+                        <select name="newStatus" class="form-select" id="statusSelect" required>
+                            @foreach (var status in Enum.GetValues(typeof(ZEGU.Core.Enums.MaintenanceRequestStatus)).Cast<ZEGU.Core.Enums.MaintenanceRequestStatus>())
+                            {
+                                <option value="@((int)status)" selected="@(status == Model.Status)">@status</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Comments (Optional)</label>
+                        <textarea name="comments" class="form-control" rows="2" placeholder="Reason for status change"></textarea>
+                    </div>
+
+                    <div id="completionFields" style="display: none;">
+                        <hr />
+                        <h6><i class="bi bi-currency-dollar"></i> Cost Tracking</h6>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Labor Cost</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" name="laborCost" class="form-control" step="0.01" min="0" value="@Model.LaborCost" />
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Material Cost</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" name="materialCost" class="form-control" step="0.01" min="0" value="@Model.MaterialCost" />
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Other Cost</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" name="otherCost" class="form-control" step="0.01" min="0" value="@Model.OtherCost" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">After Completion Photo</label>
+                            <input type="file" name="afterPhoto" class="form-control" accept="image/*" />
+                            <small class="text-muted">Upload a photo showing the completed work</small>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg"></i> Update Status
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('statusSelect').addEventListener('change', function() {
+            var completionFields = document.getElementById('completionFields');
+            completionFields.style.display = this.value === '7' ? 'block' : 'none';
+        });
+    </script>
+}

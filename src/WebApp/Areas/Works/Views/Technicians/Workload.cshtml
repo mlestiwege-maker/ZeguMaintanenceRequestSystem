@@ -1,0 +1,126 @@
+@model ZEGU.WebApp.ViewModels.Works.TechnicianWorkloadViewModel
+@{
+    ViewData["Title"] = "Technician Workload";
+}
+
+<div class="page-header">
+    <div>
+        <h2><i class="bi bi-people"></i> Technician Workload</h2>
+        <p class="page-subtitle">Monitor technician assignments and capacity</p>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card stat-card bg-primary text-white">
+            <div class="card-body">
+                <div>
+                    <p class="stat-label mb-1"><i class="bi bi-people me-2"></i>Total Technicians</p>
+                    <h3 class="stat-value mb-0">@Model.TotalTechnicians</h3>
+                </div>
+                <i class="bi bi-people stat-icon"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card bg-success text-white">
+            <div class="card-body">
+                <div>
+                    <p class="stat-label mb-1"><i class="bi bi-check-circle me-2"></i>Available</p>
+                    <h3 class="stat-value mb-0">@Model.AvailableTechnicians</h3>
+                </div>
+                <i class="bi bi-check-circle stat-icon"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card bg-warning text-dark">
+            <div class="card-body">
+                <div>
+                    <p class="stat-label mb-1"><i class="bi bi-briefcase me-2"></i>Busy</p>
+                    <h3 class="stat-value mb-0">@Model.BusyTechnicians</h3>
+                </div>
+                <i class="bi bi-briefcase stat-icon"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card bg-info text-white">
+            <div class="card-body">
+                <div>
+                    <p class="stat-label mb-1"><i class="bi bi-clipboard-check me-2"></i>Active Assignments</p>
+                    <h3 class="stat-value mb-0">@Model.TotalActiveAssignments</h3>
+                </div>
+                <i class="bi bi-clipboard-check stat-icon"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    @foreach (var tech in Model.Technicians.OrderByDescending(t => t.ActiveAssignments))
+    {
+        <div class="col-md-6 col-lg-4 mb-3">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="mb-0">@tech.TechnicianName</h6>
+                        <small class="text-muted">@tech.TechnicianType</small>
+                    </div>
+                    <span class="badge @(tech.IsAvailable ? "bg-success" : "bg-secondary")">
+                        @(tech.IsAvailable ? "Available" : "Unavailable")
+                    </span>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center mb-3">
+                        <div class="col-4">
+                            <h4 class="mb-0 text-primary">@tech.ActiveAssignments</h4>
+                            <small class="text-muted">Active</small>
+                        </div>
+                        <div class="col-4">
+                            <h4 class="mb-0 text-success">@tech.CompletedAssignments</h4>
+                            <small class="text-muted">Completed</small>
+                        </div>
+                        <div class="col-4">
+                            <h4 class="mb-0 text-info">@tech.WorkLogCount</h4>
+                            <small class="text-muted">Work Logs</small>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Hours This Month:</span>
+                        <strong>@(tech.TotalHoursThisMonth.HasValue ? tech.TotalHoursThisMonth.Value.ToString("F1") : "0")</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Total Labor Cost:</span>
+                        <strong>@tech.TotalLaborCost?.ToString("C")</strong>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">Avg Completion:</span>
+                        <strong>@(tech.AvgCompletionDays.HasValue ? tech.AvgCompletionDays.Value.ToString("F1") + " days" : "N/A")</strong>
+                    </div>
+
+                    @if (tech.CurrentRequests.Any())
+                    {
+                        <hr />
+                        <h6 class="mb-2"><i class="bi bi-list-task"></i> Current Requests</h6>
+                        <div class="list-group list-group-flush">
+                            @foreach (var req in tech.CurrentRequests)
+                            {
+                                <a asp-action="Details" asp-controller="Home" asp-route-id="@req.Id" class="list-group-item list-group-item-action p-2">
+                                    <div class="d-flex justify-content-between">
+                                        <small><strong>@req.RequestNumber</strong></small>
+                                        <span class="badge priority-@req.Priority.ToString().ToLower()" style="font-size: 0.65rem;">@req.Priority</span>
+                                    </div>
+                                    <small class="text-muted text-truncate d-block">@req.Title</small>
+                                </a>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>

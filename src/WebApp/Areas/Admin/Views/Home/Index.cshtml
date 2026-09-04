@@ -1,0 +1,200 @@
+@model ZEGU.WebApp.ViewModels.Admin.AdminDashboardViewModel
+
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="page-header">
+    <div>
+        <h2><i class="bi bi-gear"></i> Admin Dashboard</h2>
+        <p class="page-subtitle">System overview and management at a glance</p>
+    </div>
+    <a asp-area="Admin" asp-controller="Reports" asp-action="Index" class="btn btn-primary">
+        <i class="bi bi-bar-chart"></i> View Reports
+    </a>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card stat-card bg-primary text-white">
+            <div class="card-body">
+                <div>
+                    <p class="stat-label mb-1"><i class="bi bi-people me-2"></i>Users</p>
+                    <h3 class="stat-value mb-0">@Model.TotalUsers</h3>
+                </div>
+                <i class="bi bi-people stat-icon"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card bg-success text-white">
+            <div class="card-body">
+                <div>
+                    <p class="stat-label mb-1"><i class="bi bi-list-ul me-2"></i>Requests</p>
+                    <h3 class="stat-value mb-0">@Model.TotalRequests</h3>
+                </div>
+                <i class="bi bi-list-ul stat-icon"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card bg-info text-white">
+            <div class="card-body">
+                <div>
+                    <p class="stat-label mb-1"><i class="bi bi-wrench me-2"></i>Technicians</p>
+                    <h3 class="stat-value mb-0">@Model.TotalTechnicians</h3>
+                </div>
+                <i class="bi bi-wrench stat-icon"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card bg-warning text-dark">
+            <div class="card-body">
+                <div>
+                    <p class="stat-label mb-1"><i class="bi bi-tags me-2"></i>Categories</p>
+                    <h3 class="stat-value mb-0">@Model.TotalCategories</h3>
+                </div>
+                <i class="bi bi-tags stat-icon"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card stat-card bg-danger text-white">
+            <div class="card-body">
+                <div>
+                    <p class="stat-label mb-1"><i class="bi bi-clock me-2"></i>Pending</p>
+                    <h3 class="stat-value mb-0">@Model.PendingRequests</h3>
+                </div>
+                <i class="bi bi-clock stat-icon"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card bg-info text-white">
+            <div class="card-body">
+                <div>
+                    <p class="stat-label mb-1"><i class="bi bi-arrow-repeat me-2"></i>In Progress</p>
+                    <h3 class="stat-value mb-0">@Model.OpenRequests</h3>
+                </div>
+                <i class="bi bi-arrow-repeat stat-icon"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card bg-success text-white">
+            <div class="card-body">
+                <div>
+                    <p class="stat-label mb-1"><i class="bi bi-check-circle me-2"></i>Completed</p>
+                    <h3 class="stat-value mb-0">@Model.CompletedRequests</h3>
+                </div>
+                <i class="bi bi-check-circle stat-icon"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card bg-secondary text-white">
+            <div class="card-body">
+                <div>
+                    <p class="stat-label mb-1"><i class="bi bi-building me-2"></i>Departments</p>
+                    <h3 class="stat-value mb-0">@Model.TotalDepartments</h3>
+                </div>
+                <i class="bi bi-building stat-icon"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card stat-card bg-dark text-white">
+            <div class="card-body">
+                <div>
+                    <p class="stat-label mb-1"><i class="bi bi-geo-alt me-2"></i>Campuses</p>
+                    <h3 class="stat-value mb-0">@Model.TotalCampuses</h3>
+                </div>
+                <i class="bi bi-geo-alt stat-icon"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stat-card bg-primary text-white">
+            <div class="card-body">
+                <div>
+                    <p class="stat-label mb-1"><i class="bi bi-building me-2"></i>Buildings</p>
+                    <h3 class="stat-value mb-0">@Model.TotalBuildings</h3>
+                </div>
+                <i class="bi bi-building stat-icon"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stat-card bg-info text-white">
+            <div class="card-body">
+                <div>
+                    <p class="stat-label mb-1"><i class="bi bi-door-open me-2"></i>Rooms</p>
+                    <h3 class="stat-value mb-0">@Model.TotalRooms</h3>
+                </div>
+                <i class="bi bi-door-open stat-icon"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5><i class="bi bi-clock-history"></i> Recent Requests</h5>
+                <a asp-area="Works" asp-controller="Home" asp-action="AllRequests" class="btn btn-primary btn-sm">View All Requests</a>
+            </div>
+            <div class="card-body">
+                @if (Model.RecentRequests.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Request #</th>
+                                    <th>Requester</th>
+                                    <th>Category</th>
+                                    <th>Priority</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var request in Model.RecentRequests)
+                                {
+                                    <tr>
+                                        <td><strong>@request.RequestNumber</strong></td>
+                                        <td>@request.User.FirstName @request.User.LastName</td>
+                                        <td>@request.Category.CategoryName</td>
+                                        <td>
+                                            <span class="badge priority-@request.Priority.ToString().ToLower()">@request.Priority</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge status-@request.Status.ToString().ToLower()">@request.Status</span>
+                                        </td>
+                                        <td>@request.CreatedAt.ToString("dd/MM/yyyy")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="empty-state">
+                        <i class="bi bi-inbox"></i>
+                        <h4>No requests yet</h4>
+                        <p>There are no maintenance requests in the system.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

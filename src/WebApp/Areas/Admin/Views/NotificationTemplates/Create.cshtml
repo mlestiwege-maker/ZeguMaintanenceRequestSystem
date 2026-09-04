@@ -1,0 +1,63 @@
+@model ZEGU.Core.Entities.Maintenance.NotificationTemplate
+@{
+    ViewData["Title"] = "New Template";
+}
+
+<div class="page-header">
+    <div>
+        <h2><i class="bi bi-plus-circle"></i> New Notification Template</h2>
+        <p class="page-subtitle">Create a reusable notification template</p>
+    </div>
+    <a asp-action="Index" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Back
+    </a>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <form asp-action="Create" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="mb-3">
+                        <label class="form-label">Template Name *</label>
+                        <input asp-for="Name" class="form-control" placeholder="e.g., Request Submitted" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Type *</label>
+                        <select asp-for="Type" class="form-select" asp-items="@(new SelectList(ViewBag.Types))" required></select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Subject *</label>
+                        <input asp-for="Subject" class="form-control" placeholder="e.g., New Request Submitted" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Body *</label>
+                        <textarea asp-for="Body" class="form-control" rows="6" placeholder="Use {RequestNumber}, {UserName}, {Status} as placeholders" required></textarea>
+                        <small class="text-muted">Available placeholders: {RequestNumber}, {Title}, {UserName}, {Status}, {Priority}, {Date}</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Placeholders (comma-separated)</label>
+                        <input name="PlaceholdersString" class="form-control" placeholder="{RequestNumber}, {UserName}, {Status}" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea asp-for="Description" class="form-control" rows="2"></textarea>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg"></i> Create Template
+                        </button>
+                        <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

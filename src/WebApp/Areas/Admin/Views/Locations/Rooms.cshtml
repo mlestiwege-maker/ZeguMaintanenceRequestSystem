@@ -1,0 +1,76 @@
+@model ZEGU.Core.Entities.Shared.Building
+
+@{
+    ViewData["Title"] = $"Rooms - {Model.BuildingName}";
+}
+
+<div class="page-header">
+    <div>
+        <h2><i class="bi bi-door-open"></i> Rooms: @Model.BuildingName</h2>
+        <p class="page-subtitle">Manage rooms for this building</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-action="CreateRoom" asp-route-buildingId="@Model.Id" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Add Room
+        </a>
+        <a asp-action="Index" class="btn btn-secondary">Back to Buildings</a>
+    </div>
+</div>
+
+@if (Model.Rooms.Any())
+{
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Room Number</th>
+                            <th>Floor</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var room in Model.Rooms.OrderBy(r => r.Floor).ThenBy(r => r.RoomNumber))
+                        {
+                            <tr>
+                                <td><strong>@room.RoomNumber</strong></td>
+                                <td>Floor @room.Floor</td>
+                                <td>@(string.IsNullOrEmpty(room.RoomType) ? "N/A" : room.RoomType)</td>
+                                <td>
+                                    <span class="badge @(room.IsActive ? "bg-success" : "bg-danger")">
+                                        @(room.IsActive ? "Active" : "Inactive")
+                                    </span>
+                                </td>
+                                <td class="table-actions">
+                                    <form method="post" asp-action="ToggleRoomActive" asp-route-id="@room.Id" style="display: inline;">
+                                        <button type="submit" class="btn btn-sm @(room.IsActive ? "btn-warning" : "btn-success")" title="@(room.IsActive ? "Deactivate" : "Activate")">
+                                            <i class="bi bi-@(room.IsActive ? "x-circle" : "check-circle")"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="card">
+        <div class="card-body">
+            <div class="empty-state">
+                <i class="bi bi-door-open"></i>
+                <h4>No rooms found</h4>
+                <p>This building doesn't have any rooms yet.</p>
+                <a asp-action="CreateRoom" asp-route-buildingId="@Model.Id" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Add the first room
+                </a>
+            </div>
+        </div>
+    </div>
+}

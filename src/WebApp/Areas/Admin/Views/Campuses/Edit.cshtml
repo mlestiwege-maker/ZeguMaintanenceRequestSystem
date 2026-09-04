@@ -1,0 +1,45 @@
+@model ZEGU.Core.Entities.Shared.Campus
+
+@{
+    ViewData["Title"] = "Edit Campus";
+}
+
+<div class="page-header">
+    <div>
+        <h2><i class="bi bi-geo-alt"></i> Edit Campus</h2>
+        <p class="page-subtitle">Update campus information</p>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <form method="post" asp-action="Edit">
+                    <input type="hidden" asp-for="Id" />
+                    <input type="hidden" asp-for="IsActive" />
+                    <div class="mb-3">
+                        <label class="form-label">Campus Name</label>
+                        <input asp-for="CampusName" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Code</label>
+                        <input asp-for="Code" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Address</label>
+                        <textarea asp-for="Address" class="form-control" rows="3"></textarea>
+                    </div>
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg"></i> Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

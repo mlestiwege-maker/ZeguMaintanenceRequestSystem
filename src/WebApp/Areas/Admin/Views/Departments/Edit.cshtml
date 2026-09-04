@@ -1,0 +1,53 @@
+@model ZEGU.Core.Entities.Shared.Department
+
+@{
+    ViewData["Title"] = "Edit Department";
+}
+
+<div class="page-header">
+    <div>
+        <h2><i class="bi bi-building"></i> Edit Department</h2>
+        <p class="page-subtitle">Update department information</p>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <form method="post" asp-action="Edit">
+                    <input type="hidden" asp-for="Id" />
+                    <input type="hidden" asp-for="IsActive" />
+                    <div class="mb-3">
+                        <label class="form-label">Department Name</label>
+                        <input asp-for="DepartmentName" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Code</label>
+                        <input asp-for="Code" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Head of Department</label>
+                        <input asp-for="HeadOfDepartment" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Contact Email</label>
+                        <input asp-for="ContactEmail" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Contact Phone</label>
+                        <input asp-for="ContactPhone" class="form-control" />
+                    </div>
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg"></i> Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

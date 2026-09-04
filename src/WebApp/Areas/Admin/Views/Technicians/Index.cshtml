@@ -1,0 +1,71 @@
+@model List<ZEGU.Core.Entities.Maintenance.Technician>
+
+@{
+    ViewData["Title"] = "Manage Technicians";
+}
+
+<div class="page-header">
+    <div>
+        <h2><i class="bi bi-wrench"></i> Manage Technicians</h2>
+        <p class="page-subtitle">Create and manage maintenance technicians</p>
+    </div>
+    <a asp-action="Create" class="btn btn-primary">
+        <i class="bi bi-person-plus"></i> Add Technician
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Specialization</th>
+                        <th>Phone</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var tech in Model)
+                    {
+                        <tr>
+                            <td>
+                                @if (tech.User != null)
+                                {
+                                    @tech.User.FirstName @tech.User.LastName
+                                }
+                                else
+                                {
+                                    <span class="text-muted">No user linked</span>
+                                }
+                            </td>
+                            <td>@tech.TechnicianType</td>
+                            <td>@tech.Specialization</td>
+                            <td>@tech.PhoneNumber</td>
+                            <td>
+                                @if (tech.IsAvailable)
+                                {
+                                    <span class="badge bg-success">Available</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">Unavailable</span>
+                                }
+                            </td>
+                            <td class="table-actions">
+                                <form method="post" asp-action="ToggleAvailability" asp-route-id="@tech.Id" style="display: inline;">
+                                    <button type="submit" class="btn btn-sm @(tech.IsAvailable ? "btn-warning" : "btn-success")" title="@(tech.IsAvailable ? "Mark Unavailable" : "Mark Available")">
+                                        <i class="bi bi-@(tech.IsAvailable ? "x-circle" : "check-circle")"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

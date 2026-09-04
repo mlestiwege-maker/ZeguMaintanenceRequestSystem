@@ -1,0 +1,55 @@
+@{
+    ViewData["Title"] = "Assign Technician";
+}
+
+<div class="page-header">
+    <div>
+        <h2><i class="bi bi-person-plus"></i> Assign Technician</h2>
+        <p class="page-subtitle">Assign a technician to handle this maintenance request</p>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                @if (ViewBag.Request != null)
+                {
+                    var request = (ZEGU.Core.Entities.Maintenance.MaintenanceRequest)ViewBag.Request;
+                    <div class="alert alert-info">
+                        <strong>Request:</strong> @request.RequestNumber - @request.Title<br />
+                        <strong>Category:</strong> @request.Category?.CategoryName<br />
+                        <strong>Location:</strong> @request.Location?.RoomNumber
+                    </div>
+                }
+
+                <form method="post" asp-action="AssignTechnician">
+                    @if (ViewBag.Request != null)
+                    {
+                        <input type="hidden" name="id" value="@((ViewBag.Request as ZEGU.Core.Entities.Maintenance.MaintenanceRequest)?.Id)" />
+                    }
+                    <div class="mb-3">
+                        <label class="form-label required-field">Select Technician</label>
+                        <select name="technicianId" class="form-select" required>
+                            <option value="">-- Select Technician --</option>
+                            @foreach (var tech in ViewBag.Technicians)
+                            {
+                                <option value="@tech.Id">@tech.TechnicianType - @(tech.User?.FirstName ?? "No User") @(tech.User?.LastName ?? "")</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Notes (Optional)</label>
+                        <textarea name="notes" class="form-control" rows="3" placeholder="Any special instructions for the technician"></textarea>
+                    </div>
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a asp-action="AllRequests" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-person-plus"></i> Assign Technician
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

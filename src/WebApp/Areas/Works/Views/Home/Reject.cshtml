@@ -1,0 +1,42 @@
+@model ZEGU.Core.Entities.Maintenance.MaintenanceRequest
+
+@{
+    ViewData["Title"] = "Reject Request";
+}
+
+<div class="page-header">
+    <div>
+        <h2><i class="bi bi-x-circle"></i> Reject Request</h2>
+        <p class="page-subtitle">Provide a reason for rejecting this maintenance request</p>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <h4><i class="bi bi-x-circle"></i> Reject Request</h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <strong>Request:</strong> @Model.RequestNumber - @Model.Title<br />
+                    <strong>Requester:</strong> @Model.User.FirstName @Model.User.LastName
+                </div>
+
+                <form method="post" asp-action="Reject">
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    <div class="mb-3">
+                        <label class="form-label required-field">Rejection Reason</label>
+                        <textarea name="rejectionReason" class="form-control" rows="4" required placeholder="Please provide a reason for rejection..."></textarea>
+                    </div>
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-x-circle"></i> Reject Request
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

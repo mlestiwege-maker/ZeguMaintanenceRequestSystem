@@ -1,0 +1,42 @@
+@{
+    ViewData["Title"] = "Add Room";
+}
+
+<div class="page-header">
+    <div>
+        <h2><i class="bi bi-plus-circle"></i> Add Room</h2>
+        <p class="page-subtitle">Add a new room to this building</p>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <form method="post" asp-action="CreateRoom">
+                    <input type="hidden" name="buildingId" value="@ViewBag.BuildingId" />
+                    <div class="mb-3">
+                        <label class="form-label">Room Number</label>
+                        <input type="text" name="roomNumber" class="form-control" placeholder="e.g. Lab 101, Office 201" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Floor</label>
+                        <input type="number" name="floor" class="form-control" required min="1" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Room Type</label>
+                        <input type="text" name="roomType" class="form-control" placeholder="e.g. Laboratory, Office, Lecture Room" />
+                    </div>
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a asp-action="Rooms" asp-route-buildingId="@ViewBag.BuildingId" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-door-open"></i> Add Room
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

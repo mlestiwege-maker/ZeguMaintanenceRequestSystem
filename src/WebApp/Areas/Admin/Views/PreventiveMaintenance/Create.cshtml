@@ -1,0 +1,83 @@
+@model ZEGU.Core.Entities.Maintenance.PreventiveMaintenanceSchedule
+@{
+    ViewData["Title"] = "New Schedule";
+}
+
+<div class="page-header">
+    <div>
+        <h2><i class="bi bi-plus-circle"></i> New Preventive Maintenance Schedule</h2>
+        <p class="page-subtitle">Create a new maintenance schedule</p>
+    </div>
+    <a asp-action="Index" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Back
+    </a>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <form asp-action="Create" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="mb-3">
+                        <label class="form-label">Schedule Name *</label>
+                        <input asp-for="ScheduleName" class="form-control" placeholder="e.g., Monthly HVAC Inspection" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea asp-for="Description" class="form-control" rows="2" placeholder="Describe the maintenance activity"></textarea>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Category *</label>
+                            <select asp-for="CategoryId" class="form-select" asp-items="ViewBag.Categories" required>
+                                <option value="">Select Category</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Location *</label>
+                            <select asp-for="LocationId" class="form-select" asp-items="ViewBag.Locations" required>
+                                <option value="">Select Location</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Frequency *</label>
+                            <select asp-for="Frequency" class="form-select" asp-items="ViewBag.Frequencies" required>
+                                <option value="">Select Frequency</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Frequency Days *</label>
+                            <input asp-for="FrequencyDays" type="number" class="form-control" required />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Assigned Technician</label>
+                            <select asp-for="TechnicianId" class="form-select" asp-items="ViewBag.Technicians">
+                                <option value="">Unassigned</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Next Due Date *</label>
+                            <input asp-for="NextDue" type="date" class="form-control" required />
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg"></i> Create Schedule
+                        </button>
+                        <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

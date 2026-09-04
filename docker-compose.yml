@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  zegu-web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: zegu-web
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Host=zegu-db;Port=5432;Database=ZEGU;Username=zegu;Password=${DB_PASSWORD:-ZEGU_SecurePass_2026}
+      - AdminSettings__Email=${ADMIN_EMAIL:-admin@zegu.ac.zw}
+      - AdminSettings__Password=${ADMIN_PASSWORD:-ChangeMe123!@#}
+      - AppUrl=${APP_URL:-http://localhost:8080}
+    depends_on:
+      zegu-db:
+        condition: service_healthy
+    networks:
+      - zegu-network
+    volumes:
+      - zegu-uploads:/app/wwwroot/uploads
+      - zegu-logs:/app/logs
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  zegu-db:
+    image: postgres:15-alpine
+    container_name: zegu-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=ZEGU
+      - POSTGRES_USER=zegu
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-ZEGU_SecurePass_2026}
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - zegu-db-data:/var/lib/postgresql/data
+    networks:
+      - zegu-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U zegu -d ZEGU"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  zegu-pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: zegu-pgadmin
+    restart: unless-stopped
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL:-admin@zegu.ac.zw}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD:-admin}
+    ports:
+      - "5050:80"
+    depends_on:
+      - zegu-db
+    networks:
+      - zegu-network
+
+volumes:
+  zegu-db-data:
+  zegu-uploads:
+  zegu-logs:
+
+networks:
+  zegu-network:
+    driver: bridge

@@ -1,0 +1,96 @@
+@{
+    ViewData["Title"] = "Add Work Log";
+}
+
+<div class="page-header">
+    <div>
+        <h2><i class="bi bi-journal-text"></i> Add Work Log</h2>
+        <p class="page-subtitle">Record work performed for this request</p>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                @if (ViewBag.Request != null)
+                {
+                    var request = (ZEGU.Core.Entities.Maintenance.MaintenanceRequest)ViewBag.Request;
+                    <div class="alert alert-info">
+                        <strong>Request:</strong> @request.RequestNumber - @request.Title
+                    </div>
+                }
+
+                <form method="post" asp-action="Create">
+                    <input type="hidden" name="requestId" value="@ViewBag.RequestId" />
+                    
+                    <div class="mb-3">
+                        <label class="form-label required-field">Work Performed</label>
+                        <textarea name="workPerformed" class="form-control" rows="4" required placeholder="Describe the work done..."></textarea>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Technician</label>
+                            <select name="technicianId" class="form-select">
+                                <option value="">-- Select Technician --</option>
+                                @foreach (var tech in ViewBag.Technicians)
+                                {
+                                    <option value="@tech.Id">@tech.TechnicianType - @(tech.User?.FirstName ?? "N/A") @(tech.User?.LastName ?? "")</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Hours Spent</label>
+                            <input type="number" step="0.5" name="hoursSpent" class="form-control" id="hoursSpent" />
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Labor Rate ($/hr)</label>
+                            <input type="number" step="0.01" name="laborRate" class="form-control" id="laborRate" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Estimated Labor Cost</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="text" class="form-control" id="estimatedCost" readonly value="0.00" />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Started At</label>
+                            <input type="datetime-local" name="startedAt" class="form-control" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Completed At</label>
+                            <input type="datetime-local" name="completedAt" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a asp-action="Index" asp-route-requestId="@ViewBag.RequestId" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg"></i> Save Work Log
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function updateEstimatedCost() {
+            var hours = parseFloat(document.getElementById('hoursSpent').value) || 0;
+            var rate = parseFloat(document.getElementById('laborRate').value) || 0;
+            document.getElementById('estimatedCost').value = (hours * rate).toFixed(2);
+        }
+        document.getElementById('hoursSpent').addEventListener('input', updateEstimatedCost);
+        document.getElementById('laborRate').addEventListener('input', updateEstimatedCost);
+    </script>
+}

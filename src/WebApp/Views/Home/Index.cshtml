@@ -1,0 +1,105 @@
+﻿@{
+    ViewData["Title"] = "Home";
+}
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-5 text-center" style="background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%); color: white; border-radius: 0.5rem;">
+                <i class="bi bi-tools" style="font-size: 3.5rem; opacity: 0.9;"></i>
+                <h1 class="mt-3 fw-bold">Welcome to ZEGU Maintenance</h1>
+                <p class="lead mb-4 opacity-75">Your central hub for submitting and tracking maintenance requests across campus.</p>
+                @if (User.Identity.IsAuthenticated)
+                {
+                    @if (User.IsInRole("Student") || User.IsInRole("Staff"))
+                    {
+                        <a asp-area="Requests" asp-controller="Home" asp-action="Create" class="btn btn-light btn-lg me-2">
+                            <i class="bi bi-plus-circle"></i> New Request
+                        </a>
+                    }
+                    <a asp-area="" asp-controller="Account" asp-action="Profile" class="btn btn-outline-light btn-lg">
+                        <i class="bi bi-person-circle"></i> My Profile
+                    </a>
+                }
+                else
+                {
+                    <a asp-area="" asp-controller="Account" asp-action="Login" class="btn btn-light btn-lg me-2">
+                        <i class="bi bi-box-arrow-in-right"></i> Sign In
+                    </a>
+                    <a asp-area="" asp-controller="Account" asp-action="Register" class="btn btn-outline-light btn-lg">
+                        <i class="bi bi-person-plus"></i> Register
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (User.Identity.IsAuthenticated)
+{
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card stat-card bg-primary text-white h-100">
+                <div class="card-body">
+                    <div>
+                        <h5 class="card-title"><i class="bi bi-speedometer2"></i> Quick Actions</h5>
+                        <p class="card-text small opacity-75">Access your most used features</p>
+                    </div>
+                    <div class="mt-3 d-grid gap-2">
+                        @if (User.IsInRole("Student") || User.IsInRole("Staff"))
+                        {
+                            <a asp-area="Requests" asp-controller="Home" asp-action="Create" class="btn btn-light btn-sm text-start">
+                                <i class="bi bi-plus-circle me-2"></i> Submit a Request
+                            </a>
+                            <a asp-area="Requests" asp-controller="Home" asp-action="MyRequests" class="btn btn-light btn-sm text-start">
+                                <i class="bi bi-list-check me-2"></i> View My Requests
+                            </a>
+                        }
+                        <a asp-area="" asp-controller="Account" asp-action="Profile" class="btn btn-light btn-sm text-start">
+                            <i class="bi bi-person me-2"></i> Update Profile
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card stat-card bg-success text-white h-100">
+                <div class="card-body">
+                    <div>
+                        <h5 class="card-title"><i class="bi bi-info-circle"></i> How It Works</h5>
+                        <p class="card-text small opacity-75">Simple 3-step process</p>
+                    </div>
+                    <div class="mt-3">
+                        <div class="d-flex align-items-start mb-2">
+                            <span class="badge bg-light text-primary me-2">1</span>
+                            <small>Submit a maintenance request with details</small>
+                        </div>
+                        <div class="d-flex align-items-start mb-2">
+                            <span class="badge bg-light text-primary me-2">2</span>
+                            <small>Works team reviews and assigns a technician</small>
+                        </div>
+                        <div class="d-flex align-items-start">
+                            <span class="badge bg-light text-primary me-2">3</span>
+                            <small>Track progress until completion</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card stat-card bg-info text-white h-100">
+                <div class="card-body">
+                    <div>
+                        <h5 class="card-title"><i class="bi bi-telephone"></i> Need Help?</h5>
+                        <p class="card-text small opacity-75">Contact the Works Department</p>
+                    </div>
+                    <div class="mt-3">
+                        <p class="mb-1"><i class="bi bi-envelope me-2"></i>works@zegu.edu</p>
+                        <p class="mb-1"><i class="bi bi-telephone me-2"></i>+255 123 456 789</p>
+                        <p class="mb-0"><i class="bi bi-geo-alt me-2"></i>Works Department, Main Campus</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}

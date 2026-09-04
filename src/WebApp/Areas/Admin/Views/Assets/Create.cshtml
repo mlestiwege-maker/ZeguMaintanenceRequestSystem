@@ -1,0 +1,115 @@
+@model ZEGU.Core.Entities.Maintenance.Asset
+@{
+    ViewData["Title"] = "Add Asset";
+}
+
+<div class="page-header">
+    <div>
+        <h2><i class="bi bi-plus-circle"></i> Add New Asset</h2>
+        <p class="page-subtitle">Register a new asset in the system</p>
+    </div>
+    <a asp-action="Index" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Back to List
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-body">
+                <form asp-action="Create" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Asset Name <span class="text-danger">*</span></label>
+                            <input asp-for="AssetName" class="form-control" placeholder="Enter asset name" />
+                            <span asp-validation-for="AssetName" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Asset Code</label>
+                            <input asp-for="AssetCode" class="form-control" placeholder="e.g., AST-001" />
+                            <span asp-validation-for="AssetCode" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Serial Number</label>
+                            <input asp-for="SerialNumber" class="form-control" placeholder="Enter serial number" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Category <span class="text-danger">*</span></label>
+                            <select asp-for="CategoryId" class="form-select" asp-items="ViewBag.Categories" required>
+                                <option value="">Select Category</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Location <span class="text-danger">*</span></label>
+                            <select asp-for="LocationId" class="form-select" asp-items="ViewBag.Locations" required>
+                                <option value="">Select Location</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Status</label>
+                            <select asp-for="Status" class="form-select" asp-items="ViewBag.Statuses">
+                                <option value="">Select Status</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Manufacturer</label>
+                            <input asp-for="Manufacturer" class="form-control" placeholder="Enter manufacturer" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Model</label>
+                            <input asp-for="Model" class="form-control" placeholder="Enter model" />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Purchase Date</label>
+                            <input asp-for="PurchaseDate" class="form-control" type="date" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Warranty Expiry</label>
+                            <input asp-for="WarrantyExpiry" class="form-control" type="date" />
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg"></i> Create Asset
+                        </button>
+                        <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-info-circle"></i> Quick Tips
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-2"><i class="bi bi-check-circle text-success"></i> Asset Code will be used for QR generation</li>
+                    <li class="mb-2"><i class="bi bi-check-circle text-success"></i> Warranty alerts are automated</li>
+                    <li class="mb-2"><i class="bi bi-check-circle text-success"></i> Link assets to maintenance requests</li>
+                    <li><i class="bi bi-check-circle text-success"></i> Track asset maintenance history</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

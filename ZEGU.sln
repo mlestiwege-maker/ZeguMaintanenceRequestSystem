@@ -1,0 +1,41 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{7BE30148-A190-4035-A8A9-DCBC3F9B901B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZEGU.Core", "src\Core\ZEGU.Core.csproj", "{5E9EE2F0-970D-4496-A709-59B8962627DA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZEGU.Infrastructure", "src\Infrastructure\ZEGU.Infrastructure.csproj", "{AB1B0DBD-298C-4A79-A54C-8C35A51815B4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZEGU.WebApp", "src\WebApp\ZEGU.WebApp.csproj", "{38AB8160-C709-43C0-AC16-0FAC95521DB1}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5E9EE2F0-970D-4496-A709-59B8962627DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5E9EE2F0-970D-4496-A709-59B8962627DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5E9EE2F0-970D-4496-A709-59B8962627DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5E9EE2F0-970D-4496-A709-59B8962627DA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AB1B0DBD-298C-4A79-A54C-8C35A51815B4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AB1B0DBD-298C-4A79-A54C-8C35A51815B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AB1B0DBD-298C-4A79-A54C-8C35A51815B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AB1B0DBD-298C-4A79-A54C-8C35A51815B4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{38AB8160-C709-43C0-AC16-0FAC95521DB1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{38AB8160-C709-43C0-AC16-0FAC95521DB1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{38AB8160-C709-43C0-AC16-0FAC95521DB1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{38AB8160-C709-43C0-AC16-0FAC95521DB1}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{5E9EE2F0-970D-4496-A709-59B8962627DA} = {7BE30148-A190-4035-A8A9-DCBC3F9B901B}
+		{AB1B0DBD-298C-4A79-A54C-8C35A51815B4} = {7BE30148-A190-4035-A8A9-DCBC3F9B901B}
+		{38AB8160-C709-43C0-AC16-0FAC95521DB1} = {7BE30148-A190-4035-A8A9-DCBC3F9B901B}
+	EndGlobalSection
+EndGlobal

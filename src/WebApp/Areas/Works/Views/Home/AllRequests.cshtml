@@ -1,0 +1,150 @@
+@model List<ZEGU.Core.Entities.Maintenance.MaintenanceRequest>
+
+@{
+    ViewData["Title"] = "All Requests";
+}
+
+<div class="page-header">
+    <div>
+        <h2><i class="bi bi-list-check"></i> All Maintenance Requests</h2>
+        <p class="page-subtitle">Manage and track all maintenance requests across campus</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-action="ExportRequestsCsv" 
+           asp-route-search="@ViewBag.SearchTerm"
+           asp-route-status="@Context.Request.Query["status"]"
+           asp-route-priority="@Context.Request.Query["priority"]"
+           asp-route-categoryId="@ViewBag.SelectedCategoryId"
+           asp-route-technicianId="@ViewBag.SelectedTechnicianId"
+           asp-route-startDate="@(ViewBag.StartDate != null ? ((DateTime)ViewBag.StartDate).ToString("yyyy-MM-dd") : null)"
+           asp-route-endDate="@(ViewBag.EndDate != null ? ((DateTime)ViewBag.EndDate).ToString("yyyy-MM-dd") : null)"
+           class="btn btn-success">
+            <i class="bi bi-download"></i> Export CSV
+        </a>
+    </div>
+</div>
+
+<div class="filter-bar">
+    <form method="get" asp-action="AllRequests" class="row g-3">
+        <div class="col-md-3">
+            <label class="form-label small">Search</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                <input type="text" name="search" class="form-control" placeholder="Search requests..." value="@ViewBag.SearchTerm" />
+            </div>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small">Status</label>
+            <select name="status" class="form-select">
+                <option value="">All Statuses</option>
+                @foreach (var status in ViewBag.Statuses)
+                {
+                    <option value="@status" selected="@(Context.Request.Query["status"] == status.ToString() ? "selected" : null)">@status</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small">Priority</label>
+            <select name="priority" class="form-select">
+                <option value="">All Priorities</option>
+                @foreach (var priority in ViewBag.Priorities)
+                {
+                    <option value="@priority" selected="@(Context.Request.Query["priority"] == priority.ToString() ? "selected" : null)">@priority</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small">Category</label>
+            <select name="categoryId" class="form-select">
+                <option value="">All Categories</option>
+                @foreach (var cat in ViewBag.Categories)
+                {
+                    <option value="@cat.Id" selected="@(ViewBag.SelectedCategoryId == cat.Id ? "selected" : null)">@cat.CategoryName</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small">Technician</label>
+            <select name="technicianId" class="form-select">
+                <option value="">All Technicians</option>
+                @foreach (var tech in ViewBag.Technicians)
+                {
+                    <option value="@tech.Id" selected="@(ViewBag.SelectedTechnicianId == tech.Id ? "selected" : null)">@tech.User.FirstName @tech.User.LastName</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small">From Date</label>
+            <input type="date" name="startDate" class="form-control" value="@(ViewBag.StartDate != null ? ((DateTime)ViewBag.StartDate).ToString("yyyy-MM-dd") : null)" />
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small">To Date</label>
+            <input type="date" name="endDate" class="form-control" value="@(ViewBag.EndDate != null ? ((DateTime)ViewBag.EndDate).ToString("yyyy-MM-dd") : null)" />
+        </div>
+        <div class="col-md-1 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary w-100" title="Apply Filters">
+                <i class="bi bi-funnel"></i>
+            </button>
+        </div>
+    </form>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+                <table class="table table-striped table-hover table-mobile-cards">
+                    <thead>
+                        <tr>
+                            <th>Request #</th>
+                            <th>Requester</th>
+                            <th>Title</th>
+                            <th class="hide-mobile">Category</th>
+                            <th class="hide-mobile">Location</th>
+                            <th>Priority</th>
+                            <th>Status</th>
+                            <th class="hide-mobile">Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var request in Model)
+                        {
+                            <tr>
+                                <td data-label="Request #"><strong>@request.RequestNumber</strong></td>
+                                <td data-label="Requester">@request.User.FirstName @request.User.LastName</td>
+                                <td data-label="Title" class="text-truncate-2">@request.Title</td>
+                                <td data-label="Category" class="hide-mobile">@request.Category.CategoryName</td>
+                                <td data-label="Location" class="hide-mobile">@request.Location.Building.BuildingName - @request.Location.RoomNumber</td>
+                                <td data-label="Priority">
+                                    <span class="badge priority-@request.Priority.ToString().ToLower()">@request.Priority</span>
+                                </td>
+                                <td data-label="Status">
+                                    <span class="badge status-@request.Status.ToString().ToLower()">@request.Status</span>
+                                </td>
+                                <td data-label="Date" class="hide-mobile">@request.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td data-label="Actions">
+                                    <div class="table-actions">
+                                        <a asp-action="Details" asp-route-id="@request.Id" class="btn btn-sm btn-info" title="View">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        @if (request.Status == ZEGU.Core.Enums.MaintenanceRequestStatus.Submitted)
+                                        {
+                                            <a asp-action="AssignTechnician" asp-route-id="@request.Id" class="btn btn-sm btn-primary" title="Assign">
+                                                <i class="bi bi-person-plus"></i>
+                                            </a>
+                                        }
+                                        <a asp-action="UpdateStatus" asp-route-id="@request.Id" class="btn btn-sm btn-warning" title="Update Status">
+                                            <i class="bi bi-arrow-repeat"></i>
+                                        </a>
+                                        <a asp-action="UpdatePriority" asp-route-id="@request.Id" class="btn btn-sm btn-secondary" title="Update Priority">
+                                            <i class="bi bi-arrow-up-circle"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+    </div>
+</div>

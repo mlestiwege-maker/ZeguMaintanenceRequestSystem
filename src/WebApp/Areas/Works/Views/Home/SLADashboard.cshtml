@@ -1,0 +1,112 @@
+@model ZEGU.WebApp.ViewModels.Works.SLADashboardViewModel
+
+@{
+    ViewData["Title"] = "SLA Dashboard";
+}
+
+<div class="page-header">
+    <div>
+        <h2><i class="bi bi-clock-history"></i> SLA Dashboard</h2>
+        <p class="page-subtitle">Monitor service level agreements and overdue requests</p>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card stat-card bg-primary text-white">
+            <div class="card-body">
+                <div>
+                    <p class="stat-label mb-1"><i class="bi bi-list-ul me-2"></i>Active Requests</p>
+                    <h3 class="stat-value mb-0">@Model.TotalActiveRequests</h3>
+                </div>
+                <i class="bi bi-list-ul stat-icon"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stat-card bg-danger text-white">
+            <div class="card-body">
+                <div>
+                    <p class="stat-label mb-1"><i class="bi bi-exclamation-triangle me-2"></i>Overdue</p>
+                    <h3 class="stat-value mb-0">@Model.OverdueRequests</h3>
+                </div>
+                <i class="bi bi-exclamation-triangle stat-icon"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stat-card bg-success text-white">
+            <div class="card-body">
+                <div>
+                    <p class="stat-label mb-1"><i class="bi bi-check-circle me-2"></i>On Track</p>
+                    <h3 class="stat-value mb-0">@Model.OnTrackRequests</h3>
+                </div>
+                <i class="bi bi-check-circle stat-icon"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (Model.OverdueRequestList.Any())
+{
+    <div class="card">
+        <div class="card-header bg-danger text-white">
+            <h5><i class="bi bi-exclamation-triangle"></i> Overdue Requests</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Request #</th>
+                            <th>Title</th>
+                            <th>Category</th>
+                            <th>SLA (hrs)</th>
+                            <th>Submitted</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var request in Model.OverdueRequestList)
+                        {
+                            var slaDeadline = request.Category.SLAHours.HasValue ? request.CreatedAt.AddHours(request.Category.SLAHours.Value) : (DateTime?)null;
+                            var hoursOverdue = slaDeadline.HasValue ? (DateTime.UtcNow - slaDeadline.Value).TotalHours : 0;
+                            
+                            <tr>
+                                <td><strong>@request.RequestNumber</strong></td>
+                                <td>@request.Title</td>
+                                <td>@request.Category.CategoryName</td>
+                                <td>@request.Category.SLAHours</td>
+                                <td>@request.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>
+                                    <span class="badge status-@request.Status.ToString().ToLower()">@request.Status</span>
+                                </td>
+                                <td class="table-actions">
+                                    <a asp-action="Details" asp-route-id="@request.Id" class="btn btn-sm btn-info" title="View">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a asp-action="UpdatePriority" asp-route-id="@request.Id" class="btn btn-sm btn-warning" title="Update Priority">
+                                        <i class="bi bi-arrow-up-circle"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="card">
+        <div class="card-body">
+            <div class="empty-state">
+                <i class="bi bi-check-circle"></i>
+                <h4>All requests on track</h4>
+                <p>No overdue requests. All requests are within SLA.</p>
+            </div>
+        </div>
+    </div>
+}

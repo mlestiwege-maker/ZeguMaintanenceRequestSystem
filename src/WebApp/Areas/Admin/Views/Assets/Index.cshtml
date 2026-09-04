@@ -1,0 +1,153 @@
+@model IEnumerable<ZEGU.Core.Entities.Maintenance.Asset>
+@{
+    ViewData["Title"] = "Assets";
+}
+
+<div class="page-header">
+    <div>
+        <h2><i class="bi bi-box-seam"></i> Asset Management</h2>
+        <p class="page-subtitle">Manage equipment and assets across campuses</p>
+    </div>
+    <a asp-action="Create" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Add Asset
+    </a>
+</div>
+
+<div class="filter-bar">
+    <form method="get" class="row g-3 align-items-end">
+        <div class="col-md-3">
+            <label class="form-label">Search</label>
+            <input type="text" name="searchString" class="form-control" value="@ViewBag.SearchString" placeholder="Name, code, serial..." />
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Category</label>
+            <select name="categoryId" class="form-select" asp-items="ViewBag.Categories">
+                <option value="">All Categories</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Location</label>
+            <select name="locationId" class="form-select" asp-items="ViewBag.Locations">
+                <option value="">All Locations</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Status</label>
+            <select name="status" class="form-select" asp-items="ViewBag.Statuses">
+                <option value="">All Statuses</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <button type="submit" class="btn btn-outline-primary">
+                <i class="bi bi-search"></i> Filter
+            </button>
+            <a asp-action="Index" class="btn btn-outline-secondary">
+                <i class="bi bi-x-circle"></i> Clear
+            </a>
+        </div>
+    </form>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        @if (Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-mobile-cards">
+                    <thead>
+                        <tr>
+                            <th>Asset Code</th>
+                            <th>Name</th>
+                            <th class="hide-mobile">Category</th>
+                            <th class="hide-mobile">Location</th>
+                            <th>Status</th>
+                            <th class="hide-mobile">Manufacturer</th>
+                            <th class="hide-mobile">Warranty</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var asset in Model)
+                        {
+                            <tr class="@(asset.IsActive ? "" : "table-secondary")">
+                                <td data-label="Asset Code">
+                                    @if (!string.IsNullOrEmpty(asset.QrCodePath))
+                                    {
+                                        <i class="bi bi-qr-code text-primary" title="QR Code available"></i>
+                                    }
+                                    @asset.AssetCode
+                                </td>
+                                <td data-label="Name">@asset.AssetName</td>
+                                <td data-label="Category" class="hide-mobile">@asset.Category?.CategoryName</td>
+                                <td data-label="Location" class="hide-mobile">@asset.Location?.RoomNumber</td>
+                                <td data-label="Status">
+                                    <span class="badge status-@asset.Status?.Replace(" ", "").ToLower()">@asset.Status</span>
+                                </td>
+                                <td data-label="Manufacturer" class="hide-mobile">@asset.Manufacturer</td>
+                                <td data-label="Warranty" class="hide-mobile">
+                                    @if (asset.WarrantyExpiry.HasValue)
+                                    {
+                                        @if (asset.WarrantyExpiry.Value < DateTime.Now)
+                                        {
+                                            <span class="text-danger"><i class="bi bi-exclamation-triangle"></i> Expired</span>
+                                        }
+                                        else if (asset.WarrantyExpiry.Value < DateTime.Now.AddMonths(3))
+                                        {
+                                            <span class="text-warning"> @asset.WarrantyExpiry.Value.ToString("MMM yyyy")</span>
+                                        }
+                                        else
+                                        {
+                                            @asset.WarrantyExpiry.Value.ToString("MMM yyyy")
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td data-label="Actions">
+                                    <div class="table-actions">
+                                        <a asp-action="Details" asp-route-id="@asset.Id" class="btn btn-sm btn-outline-info" title="View">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a asp-action="Edit" asp-route-id="@asset.Id" class="btn btn-sm btn-outline-primary" title="Edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        @if (!string.IsNullOrEmpty(asset.QrCodePath))
+                                        {
+                                            <a asp-action="DownloadQrCode" asp-route-id="@asset.Id" class="btn btn-sm btn-outline-success" title="Download QR">
+                                                <i class="bi bi-download"></i>
+                                            </a>
+                                        }
+                                        <form asp-action="ToggleActive" asp-route-id="@asset.Id" method="post" style="display:inline;">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm @(asset.IsActive ? "btn-outline-warning" : "btn-outline-success")" title="@(asset.IsActive ? "Deactivate" : "Activate")">
+                                                <i class="bi @(asset.IsActive ? "bi-pause-circle" : "bi-play-circle")"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="empty-state">
+                <i class="bi bi-box-seam"></i>
+                <h4>No assets found</h4>
+                <p>Get started by adding your first asset to the system.</p>
+                <a asp-action="Create" class="btn btn-primary">Add Asset</a>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .status-operational { background-color: #198754; }
+    .status-undermaintenance { background-color: #ffc107; color: #212529; }
+    .status-outofservice { background-color: #dc3545; }
+    .status-disposed { background-color: #6c757d; }
+</style>

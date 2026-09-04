@@ -1,0 +1,57 @@
+@model ZEGU.Core.Entities.Shared.Building
+
+@{
+    ViewData["Title"] = "Create Building";
+}
+
+<div class="page-header">
+    <div>
+        <h2><i class="bi bi-geo-alt"></i> Create Building</h2>
+        <p class="page-subtitle">Add a new building to a campus</p>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <form method="post" asp-action="Create">
+                    <div class="mb-3">
+                        <label class="form-label required-field">Campus</label>
+                        <select name="campusId" class="form-select" required>
+                            <option value="">-- Select Campus --</option>
+                            @foreach (var campus in ViewBag.Campuses)
+                            {
+                                <option value="@campus.Id">@campus.CampusName</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label required-field">Building Name</label>
+                        <input asp-for="BuildingName" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Code</label>
+                        <input asp-for="Code" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Floors</label>
+                        <input asp-for="Floors" type="number" class="form-control" value="1" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                    </div>
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-building"></i> Create Building
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

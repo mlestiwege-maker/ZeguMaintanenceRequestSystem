@@ -1,0 +1,211 @@
+@model ZEGU.Core.Entities.Maintenance.MaintenanceRequest
+
+@{
+    ViewData["Title"] = $"Request {Model.RequestNumber} Details";
+}
+
+<div class="page-header">
+    <div>
+        <h2><i class="bi bi-file-earmark-text"></i> Request @Model.RequestNumber</h2>
+        <p class="page-subtitle">Request details, history, and actions</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-action="AllRequests" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Back
+        </a>
+        @if (Model.Status == ZEGU.Core.Enums.MaintenanceRequestStatus.Submitted)
+        {
+            <a asp-action="AssignTechnician" asp-route-id="@Model.Id" class="btn btn-primary">
+                <i class="bi bi-person-plus"></i> Assign Technician
+            </a>
+            <a asp-action="Reject" asp-route-id="@Model.Id" class="btn btn-danger">
+                <i class="bi bi-x-circle"></i> Reject
+            </a>
+        }
+        <a asp-action="UpdateStatus" asp-route-id="@Model.Id" class="btn btn-warning">
+            <i class="bi bi-arrow-repeat"></i> Update Status
+        </a>
+        <a asp-action="UpdatePriority" asp-route-id="@Model.Id" class="btn btn-secondary">
+            <i class="bi bi-arrow-up-circle"></i> Update Priority
+        </a>
+        <a asp-action="Index" asp-controller="WorkLogs" asp-route-requestId="@Model.Id" class="btn btn-info">
+            <i class="bi bi-journal-text"></i> Work Logs
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5><i class="bi bi-info-circle"></i> Request Details</h5>
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-3">Request Number</dt>
+                    <dd class="col-sm-9"><strong>@Model.RequestNumber</strong></dd>
+
+                    <dt class="col-sm-3">Requester</dt>
+                    <dd class="col-sm-9">@Model.User.FirstName @Model.User.LastName (@Model.User.Email)</dd>
+
+                    <dt class="col-sm-3">Title</dt>
+                    <dd class="col-sm-9">@Model.Title</dd>
+
+                    <dt class="col-sm-3">Category</dt>
+                    <dd class="col-sm-9">@Model.Category.CategoryName</dd>
+
+                    <dt class="col-sm-3">Location</dt>
+                    <dd class="col-sm-9">@Model.Location.Building.BuildingName - Floor @Model.Location.Floor, Room @Model.Location.RoomNumber</dd>
+
+                    <dt class="col-sm-3">Priority</dt>
+                    <dd class="col-sm-9">
+                        <span class="badge priority-@Model.Priority.ToString().ToLower()">@Model.Priority</span>
+                    </dd>
+
+                    <dt class="col-sm-3">Status</dt>
+                    <dd class="col-sm-9">
+                        <span class="badge status-@Model.Status.ToString().ToLower()">@Model.Status</span>
+                    </dd>
+
+                    <dt class="col-sm-3">Description</dt>
+                    <dd class="col-sm-9">@Model.Description</dd>
+
+                    @if (!string.IsNullOrEmpty(Model.RejectionReason))
+                    {
+                        <dt class="col-sm-3">Rejection Reason</dt>
+                        <dd class="col-sm-9 text-danger">@Model.RejectionReason</dd>
+                    }
+                </dl>
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5><i class="bi bi-chat"></i> Comments</h5>
+            </div>
+            <div class="card-body">
+                @foreach (var comment in Model.Comments.OrderBy(c => c.CreatedAt))
+                {
+                    <div class="border-bottom pb-2 mb-2">
+                        <strong>@comment.User.FirstName @comment.User.LastName</strong>
+                        @if (comment.IsInternal)
+                        {
+                            <span class="badge bg-warning text-dark ms-2">Internal</span>
+                        }
+                        <small class="text-muted">@comment.CreatedAt.ToString("dd/MM/yyyy HH:mm")</small>
+                        <p class="mb-0 mt-1">@comment.CommentText</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        @if (Model.Assignments.Any())
+        {
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5><i class="bi bi-person-badge"></i> Assigned Technician</h5>
+                </div>
+                <div class="card-body">
+                    @foreach (var assignment in Model.Assignments)
+                    {
+                        <p><strong>@assignment.Technician.TechnicianType</strong></p>
+                        @if (!string.IsNullOrEmpty(assignment.Technician.User?.FirstName))
+                        {
+                            <p>@assignment.Technician.User.FirstName @assignment.Technician.User.LastName</p>
+                        }
+                        @if (!string.IsNullOrEmpty(assignment.Notes))
+                        {
+                            <p class="text-muted"><small>@assignment.Notes</small></p>
+                        }
+                    }
+                </div>
+            </div>
+        }
+
+        @if (Model.LaborCost.HasValue || Model.MaterialCost.HasValue || Model.OtherCost.HasValue)
+        {
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5><i class="bi bi-currency-dollar"></i> Cost Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Labor:</span>
+                        <strong>@(Model.LaborCost?.ToString("C") ?? "$0.00")</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Materials:</span>
+                        <strong>@(Model.MaterialCost?.ToString("C") ?? "$0.00")</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Other:</span>
+                        <strong>@(Model.OtherCost?.ToString("C") ?? "$0.00")</strong>
+                    </div>
+                    <hr />
+                    <div class="d-flex justify-content-between">
+                        <span>Total:</span>
+                        <strong class="text-primary fs-5">@((Model.TotalCost ?? 0).ToString("C"))</strong>
+                    </div>
+                </div>
+            </div>
+        }
+
+        @if (Model.Attachments.Any() || !string.IsNullOrEmpty(Model.AfterPhotoPath))
+        {
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5><i class="bi bi-images"></i> Photos</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        @foreach (var attachment in Model.Attachments.Where(a => a.IsBeforePhoto))
+                        {
+                            <div class="col-md-6 mb-3">
+                                <div class="card">
+                                    <img src="@attachment.FilePath" class="card-img-top" alt="Before photo" style="max-height: 200px; object-fit: cover;" />
+                                    <div class="card-body p-2">
+                                        <small class="text-muted"><i class="bi bi-camera"></i> Before</small>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.AfterPhotoPath))
+                        {
+                            <div class="col-md-6 mb-3">
+                                <div class="card">
+                                    <img src="@Model.AfterPhotoPath" class="card-img-top" alt="After photo" style="max-height: 200px; object-fit: cover;" />
+                                    <div class="card-body p-2">
+                                        <small class="text-muted"><i class="bi bi-camera-fill"></i> After</small>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-clock-history"></i> Status History</h5>
+            </div>
+            <div class="card-body">
+                <div class="timeline">
+                    @foreach (var history in Model.StatusHistory.OrderBy(h => h.CreatedAt))
+                    {
+                        <div class="timeline-item">
+                            <div class="timeline-time">@history.CreatedAt.ToString("dd/MM/yyyy HH:mm")</div>
+                            <div class="timeline-content"><strong>@history.NewStatus</strong></div>
+                            @if (!string.IsNullOrEmpty(history.Comments))
+                            {
+                                <div class="timeline-content text-muted small">@history.Comments</div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

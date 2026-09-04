@@ -1,0 +1,50 @@
+@model ZEGU.Core.Entities.Maintenance.MaintenanceRequest
+
+@{
+    ViewData["Title"] = "Update Priority";
+}
+
+<div class="page-header">
+    <div>
+        <h2><i class="bi bi-arrow-up-circle"></i> Update Request Priority</h2>
+        <p class="page-subtitle">Adjust the priority level of this maintenance request</p>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <strong>Request:</strong> @Model.RequestNumber<br />
+                    <strong>Title:</strong> @Model.Title<br />
+                    <strong>Current Priority:</strong> 
+                    <span class="badge priority-@Model.Priority.ToString().ToLower()">@Model.Priority</span>
+                </div>
+
+                <form method="post" asp-action="UpdatePriority">
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    <div class="mb-3">
+                        <label class="form-label required-field">New Priority</label>
+                        <select name="newPriority" class="form-select" required>
+                            @foreach (var priority in Enum.GetValues(typeof(ZEGU.Core.Enums.RequestPriority)).Cast<ZEGU.Core.Enums.RequestPriority>())
+                            {
+                                <option value="@((int)priority)" selected="@(Model.Priority == priority ? "selected" : null)">@priority</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Comments (Optional)</label>
+                        <textarea name="comments" class="form-control" rows="3" placeholder="Reason for priority change"></textarea>
+                    </div>
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-arrow-up-circle"></i> Update Priority
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,23 @@
+@{
+    ViewData["Title"] = "Access Denied";
+}
+
+<div class="auth-page">
+    <div class="auth-card fade-in">
+        <div class="card-header bg-danger">
+            <i class="bi bi-shield-lock"></i>
+            <h3 class="mb-0">Access Denied</h3>
+            <p class="mb-0 opacity-75">You do not have permission to view this page</p>
+        </div>
+        <div class="card-body text-center">
+            <div class="empty-state">
+                <i class="bi bi-shield-exclamation"></i>
+                <h4>Restricted Area</h4>
+                <p>Please contact your administrator if you believe this is an error.</p>
+                <a asp-area="" asp-controller="Home" asp-action="Index" class="btn btn-primary">
+                    <i class="bi bi-house"></i> Go Home
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

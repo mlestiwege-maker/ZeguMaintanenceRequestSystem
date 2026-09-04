@@ -1,0 +1,61 @@
+@model ZEGU.WebApp.ViewModels.PagedResult<object>
+@{
+    var action = ViewContext.RouteData.Values["action"]?.ToString();
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+    var area = ViewContext.RouteData.Values["area"]?.ToString();
+    var queryString = Context.Request.QueryString.HasValue ? Context.Request.QueryString.Value : "";
+}
+
+@if (Model.TotalPages > 1)
+{
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center mt-3">
+            @if (Model.HasPreviousPage)
+            {
+                <li class="page-item">
+                    <a class="page-link" 
+                       href="@Url.Action(action, controller, new { area, pageNumber = Model.PageNumber - 1, pageSize = Model.PageSize })@queryString">
+                        Previous
+                    </a>
+                </li>
+            }
+            else
+            {
+                <li class="page-item disabled">
+                    <span class="page-link">Previous</span>
+                </li>
+            }
+
+            @for (int i = Math.Max(1, Model.PageNumber - 2); i <= Math.Min(Model.TotalPages, Model.PageNumber + 2); i++)
+            {
+                <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+                    <a class="page-link" 
+                       href="@Url.Action(action, controller, new { area, pageNumber = i, pageSize = Model.PageSize })@queryString">
+                        @i
+                    </a>
+                </li>
+            }
+
+            @if (Model.HasNextPage)
+            {
+                <li class="page-item">
+                    <a class="page-link" 
+                       href="@Url.Action(action, controller, new { area, pageNumber = Model.PageNumber + 1, pageSize = Model.PageSize })@queryString">
+                        Next
+                    </a>
+                </li>
+            }
+            else
+            {
+                <li class="page-item disabled">
+                    <span class="page-link">Next</span>
+                </li>
+            }
+        </ul>
+        <div class="text-center text-muted small">
+            Showing @((Model.PageNumber - 1) * Model.PageSize + 1) to 
+            @(Math.Min(Model.PageNumber * Model.PageSize, Model.TotalCount)) of 
+            @Model.TotalCount entries
+        </div>
+    </nav>
+}
