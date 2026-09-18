@@ -19,6 +19,20 @@ namespace ZEGU.WebApp.ViewModels.Admin
         public int Count { get; set; }
     }
 
+    public class DepartmentReportItem
+    {
+        public string DepartmentName { get; set; } = string.Empty;
+        public int Count { get; set; }
+        public decimal? TotalCost { get; set; }
+    }
+
+    public class LocationReportItem
+    {
+        public string BuildingName { get; set; } = string.Empty;
+        public int Count { get; set; }
+        public decimal? TotalCost { get; set; }
+    }
+
     public class TechnicianPerformanceItem
     {
         public string TechnicianName { get; set; } = string.Empty;
@@ -45,6 +59,8 @@ namespace ZEGU.WebApp.ViewModels.Admin
         public List<CategoryReportItem> RequestsByCategory { get; set; } = new();
         public List<StatusReportItem> RequestsByStatus { get; set; } = new();
         public List<PriorityReportItem> RequestsByPriority { get; set; } = new();
+        public List<DepartmentReportItem> RequestsByDepartment { get; set; } = new();
+        public List<LocationReportItem> RequestsByLocation { get; set; } = new();
         public List<TechnicianPerformanceItem> TechnicianPerformance { get; set; } = new();
         public List<MonthlyReportItem> MonthlyTrends { get; set; } = new();
         public decimal? TotalCost { get; set; }

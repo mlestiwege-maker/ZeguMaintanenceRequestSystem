@@ -9,6 +9,7 @@ using ZEGU.Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
 using ZEGU.WebApp.ViewModels.Admin;
 using System.Linq;
+using System.Security.Claims;
 using ZEGU.Infrastructure.Services;
 
 namespace ZEGU.WebApp.Areas.Admin.Controllers
@@ -592,10 +593,12 @@ namespace ZEGU.WebApp.Areas.Admin.Controllers
     public class MaterialsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly AuditService _auditService;
 
-        public MaterialsController(ApplicationDbContext context)
+        public MaterialsController(ApplicationDbContext context, AuditService auditService)
         {
             _context = context;
+            _auditService = auditService;
         }
 
         public async Task<IActionResult> Index()
@@ -628,12 +631,53 @@ namespace ZEGU.WebApp.Areas.Admin.Controllers
         {
             var material = await _context.Materials.FindAsync(id);
             if (material == null) return NotFound();
-            
+
             material.IsActive = !material.IsActive;
             material.UpdatedAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();
-            
+
             TempData["SuccessMessage"] = material.IsActive ? "Material activated!" : "Material deactivated!";
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> AdjustStock(int id)
+        {
+            var material = await _context.Materials.FindAsync(id);
+            if (material == null) return NotFound();
+            return View(material);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AdjustStock(int id, int quantity, string reason)
+        {
+            var material = await _context.Materials.FindAsync(id);
+            if (material == null) return NotFound();
+
+            if (quantity == 0)
+            {
+                ModelState.AddModelError("", "Adjustment quantity cannot be zero.");
+                return View(material);
+            }
+
+            if (string.IsNullOrWhiteSpace(reason))
+            {
+                ModelState.AddModelError("", "A reason is required for stock adjustments.");
+                return View(material);
+            }
+
+            var oldStock = material.CurrentStock;
+            material.CurrentStock = Math.Max(0, material.CurrentStock + quantity);
+            material.UpdatedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+
+            await _auditService.LogAsync(User.FindFirstValue(ClaimTypes.NameIdentifier), User.Identity?.Name,
+                "AdjustStock", "Material", entityId: material.Id,
+                oldValues: new { CurrentStock = oldStock },
+                newValues: new { material.CurrentStock, quantity, reason },
+                ipAddress: HttpContext.Connection.RemoteIpAddress?.ToString());
+
+            TempData["SuccessMessage"] = $"Stock adjusted from {oldStock} to {material.CurrentStock}.";
             return RedirectToAction(nameof(Index));
         }
     }
@@ -736,6 +780,9 @@ namespace ZEGU.WebApp.Areas.Admin.Controllers
             var query = _context.MaintenanceRequests
                 .Include(r => r.Category)
                 .Include(r => r.Assignments)
+                .Include(r => r.Department)
+                .Include(r => r.Location)
+                .ThenInclude(l => l.Building)
                 .Where(r => r.IsActive && r.CreatedAt >= start && r.CreatedAt <= end);
 
             var requests = await query.ToListAsync();
@@ -778,6 +825,26 @@ namespace ZEGU.WebApp.Areas.Admin.Controllers
                     {
                         Priority = g.Key,
                         Count = g.Count()
+                    })
+                    .ToList(),
+
+                RequestsByDepartment = requests
+                    .GroupBy(r => r.Department != null ? r.Department.DepartmentName : "Unassigned")
+                    .Select(g => new DepartmentReportItem
+                    {
+                        DepartmentName = g.Key,
+                        Count = g.Count(),
+                        TotalCost = g.Sum(r => r.TotalCost)
+                    })
+                    .ToList(),
+
+                RequestsByLocation = requests
+                    .GroupBy(r => r.Location.Building.BuildingName)
+                    .Select(g => new LocationReportItem
+                    {
+                        BuildingName = g.Key,
+                        Count = g.Count(),
+                        TotalCost = g.Sum(r => r.TotalCost)
                     })
                     .ToList(),
 

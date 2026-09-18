@@ -57,6 +57,9 @@
                                 }
                             </td>
                             <td class="table-actions">
+                                <a asp-action="AdjustStock" asp-route-id="@material.Id" class="btn btn-sm btn-info" title="Adjust Stock">
+                                    <i class="bi bi-box-seam"></i>
+                                </a>
                                 <form method="post" asp-action="ToggleActive" asp-route-id="@material.Id" style="display: inline;">
                                     <button type="submit" class="btn btn-sm @(material.IsActive ? "btn-danger" : "btn-success")" title="@(material.IsActive ? "Deactivate" : "Activate")">
                                         <i class="bi bi-@(material.IsActive ? "x-circle" : "check-circle")"></i>

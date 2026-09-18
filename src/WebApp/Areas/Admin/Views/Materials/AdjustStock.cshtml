@@ -1,0 +1,52 @@
+@model ZEGU.Core.Entities.Maintenance.Material
+
+@{
+    ViewData["Title"] = "Adjust Stock";
+}
+
+<div class="page-header">
+    <div>
+        <h2><i class="bi bi-box-seam"></i> Adjust Stock</h2>
+        <p class="page-subtitle">@Model.MaterialName</p>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert alert-danger">
+                <ul class="mb-0">
+                    @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                    {
+                        <li>@error.ErrorMessage</li>
+                    }
+                </ul>
+            </div>
+        }
+
+        <dl class="row">
+            <dt class="col-sm-3">Current Stock</dt>
+            <dd class="col-sm-9">@Model.CurrentStock @Model.Unit</dd>
+            <dt class="col-sm-3">Minimum Stock</dt>
+            <dd class="col-sm-9">@Model.MinimumStock @Model.Unit</dd>
+        </dl>
+
+        <form method="post" asp-action="AdjustStock" asp-route-id="@Model.Id">
+            @Html.AntiForgeryToken()
+            <div class="mb-3">
+                <label class="form-label">Adjustment Quantity</label>
+                <input type="number" name="quantity" class="form-control" placeholder="e.g. 50 to add stock, -10 to remove" required />
+                <small class="text-muted">Positive to add stock (e.g. restock delivery), negative to remove (e.g. damage, correction).</small>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Reason</label>
+                <input type="text" name="reason" class="form-control" placeholder="e.g. Restock delivery from supplier" required />
+            </div>
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-check-lg"></i> Apply Adjustment
+            </button>
+            <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+</div>
