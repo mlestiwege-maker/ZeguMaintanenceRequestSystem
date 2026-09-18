@@ -1,4 +1,4 @@
-@model List<ZEGU.Core.Entities.Maintenance.MaintenanceRequest>
+@model ZEGU.WebApp.ViewModels.PagedResult<ZEGU.Core.Entities.Maintenance.MaintenanceRequest>
 
 @{
     ViewData["Title"] = "All Requests";
@@ -107,7 +107,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var request in Model)
+                        @foreach (var request in Model.Items)
                         {
                             <tr>
                                 <td data-label="Request #"><strong>@request.RequestNumber</strong></td>
@@ -148,3 +148,5 @@
             </div>
     </div>
 </div>
+
+@await Html.PartialAsync("_Pagination", Model)

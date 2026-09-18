@@ -53,6 +53,24 @@ namespace ZEGU.Infrastructure.Services
                 .ToListAsync();
         }
 
+        public async Task<(string Subject, string Body)?> RenderTemplateAsync(string templateName, Dictionary<string, string> placeholders)
+        {
+            var template = await _context.NotificationTemplates
+                .FirstOrDefaultAsync(t => t.Name == templateName && t.IsActive);
+
+            if (template == null) return null;
+
+            var subject = template.Subject;
+            var body = template.Body;
+            foreach (var (key, value) in placeholders)
+            {
+                subject = subject.Replace("{" + key + "}", value);
+                body = body.Replace("{" + key + "}", value);
+            }
+
+            return (subject, body);
+        }
+
         public async Task<int> GetUnreadCountAsync(string userId)
         {
             return await _context.Notifications

@@ -9,6 +9,7 @@ using ZEGU.Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
 using ZEGU.WebApp.ViewModels.Admin;
 using System.Linq;
+using ZEGU.Infrastructure.Services;
 
 namespace ZEGU.WebApp.Areas.Admin.Controllers
 {
@@ -60,20 +61,48 @@ namespace ZEGU.WebApp.Areas.Admin.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly AuditService _auditService;
 
-        public UsersController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+        public UsersController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, AuditService auditService)
         {
             _context = context;
             _userManager = userManager;
+            _auditService = auditService;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? search = null, int pageNumber = 1, int pageSize = 25)
         {
-            var users = await _context.Users
+            pageSize = Math.Clamp(pageSize, 1, 100);
+            pageNumber = Math.Max(1, pageNumber);
+
+            var query = _context.Users
                 .Include(u => u.Department)
-                .OrderByDescending(u => u.CreatedAt)
+                .AsQueryable();
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(u => u.FirstName.Contains(search) ||
+                                          u.LastName.Contains(search) ||
+                                          (u.Email != null && u.Email.Contains(search)) ||
+                                          (u.UserName != null && u.UserName.Contains(search)));
+            }
+
+            var orderedQuery = query.OrderByDescending(u => u.CreatedAt);
+            var totalCount = await orderedQuery.CountAsync();
+            var users = await orderedQuery
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
-            return View(users);
+
+            ViewBag.SearchTerm = search;
+
+            return View(new ZEGU.WebApp.ViewModels.PagedResult<ApplicationUser>
+            {
+                Items = users,
+                TotalCount = totalCount,
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            });
         }
 
         [HttpGet]
@@ -103,6 +132,9 @@ namespace ZEGU.WebApp.Areas.Admin.Controllers
             if (result.Succeeded)
             {
                 await _userManager.AddToRoleAsync(user, role.ToString());
+                await _auditService.LogAsync(_userManager.GetUserId(User), User.Identity?.Name, "Create", "User",
+                    entityId: null, newValues: new { user.UserName, user.Email, user.Role },
+                    ipAddress: HttpContext.Connection.RemoteIpAddress?.ToString());
                 TempData["SuccessMessage"] = "User created successfully!";
                 return RedirectToAction(nameof(Index));
             }
@@ -121,10 +153,15 @@ namespace ZEGU.WebApp.Areas.Admin.Controllers
         {
             var user = await _userManager.FindByIdAsync(id);
             if (user == null) return NotFound();
-            
+
             user.IsActive = !user.IsActive;
             await _userManager.UpdateAsync(user);
-            
+
+            await _auditService.LogAsync(_userManager.GetUserId(User), User.Identity?.Name,
+                user.IsActive ? "Activate" : "Deactivate", "User",
+                entityId: null, newValues: new { user.UserName, user.IsActive },
+                ipAddress: HttpContext.Connection.RemoteIpAddress?.ToString());
+
             TempData["SuccessMessage"] = user.IsActive ? "User activated successfully!" : "User deactivated successfully!";
             return RedirectToAction(nameof(Index));
         }
@@ -145,6 +182,7 @@ namespace ZEGU.WebApp.Areas.Admin.Controllers
             var user = await _userManager.FindByIdAsync(id);
             if (user == null) return NotFound();
 
+            var oldRole = user.Role;
             user.FirstName = firstName;
             user.LastName = lastName;
             user.Email = email;
@@ -160,6 +198,9 @@ namespace ZEGU.WebApp.Areas.Admin.Controllers
             {
                 await _userManager.RemoveFromRolesAsync(user, await _userManager.GetRolesAsync(user));
                 await _userManager.AddToRoleAsync(user, role.ToString());
+                await _auditService.LogAsync(_userManager.GetUserId(User), User.Identity?.Name, "Update", "User",
+                    entityId: null, oldValues: new { Role = oldRole }, newValues: new { user.UserName, user.Role },
+                    ipAddress: HttpContext.Connection.RemoteIpAddress?.ToString());
                 TempData["SuccessMessage"] = "User updated successfully!";
                 return RedirectToAction(nameof(Index));
             }

@@ -175,11 +175,28 @@ namespace ZEGU.WebApp.Areas.Requests.Controllers
                 .Where(u => (u.Role == UserRole.WorksOfficer || u.Role == UserRole.Manager) && u.IsActive)
                 .ToListAsync();
 
+            var template = await _notificationService.RenderTemplateAsync("RequestSubmitted", new Dictionary<string, string>
+            {
+                ["RequestNumber"] = request.RequestNumber,
+                ["Title"] = request.Title,
+                ["UserName"] = $"{user.FirstName} {user.LastName}",
+                ["Status"] = "Submitted",
+                ["Priority"] = request.Priority.ToString(),
+                ["Date"] = request.CreatedAt.ToString("dd MMM yyyy")
+            });
+
             foreach (var worksUser in worksUsers)
             {
                 if (!string.IsNullOrEmpty(worksUser.Email))
                 {
-                    _ = _emailService.SendMaintenanceNotificationAsync(worksUser.Email, worksUser.FirstName, request.RequestNumber, "Submitted");
+                    if (template.HasValue)
+                    {
+                        _ = _emailService.SendEmailAsync(worksUser.Email, template.Value.Subject, template.Value.Body, isHtml: true);
+                    }
+                    else
+                    {
+                        _ = _emailService.SendMaintenanceNotificationAsync(worksUser.Email, worksUser.FirstName, request.RequestNumber, "Submitted");
+                    }
                 }
             }
 
@@ -187,20 +204,51 @@ namespace ZEGU.WebApp.Areas.Requests.Controllers
             return RedirectToAction(nameof(MyRequests));
         }
 
-        public async Task<IActionResult> MyRequests()
+        public async Task<IActionResult> MyRequests(string? search = null, string? status = null, int pageNumber = 1, int pageSize = 25)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == User.Identity.Name);
             if (user == null) return RedirectToAction("Login", "Account", new { area = "" });
 
-            var requests = await _context.MaintenanceRequests
+            pageSize = Math.Clamp(pageSize, 1, 100);
+            pageNumber = Math.Max(1, pageNumber);
+
+            var query = _context.MaintenanceRequests
                 .Include(r => r.Category)
                 .Include(r => r.Location)
                 .Include(r => r.Location.Building)
                 .Where(r => r.UserId == user.Id && r.IsActive)
-                .OrderByDescending(r => r.CreatedAt)
+                .AsQueryable();
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(r => r.RequestNumber.Contains(search) ||
+                                        r.Title.Contains(search) ||
+                                        r.Description.Contains(search));
+            }
+
+            if (!string.IsNullOrEmpty(status) && Enum.TryParse<MaintenanceRequestStatus>(status, out var statusEnum))
+            {
+                query = query.Where(r => r.Status == statusEnum);
+            }
+
+            var orderedQuery = query.OrderByDescending(r => r.CreatedAt);
+
+            ViewBag.SearchTerm = search;
+            ViewBag.Statuses = Enum.GetValues(typeof(MaintenanceRequestStatus)).Cast<MaintenanceRequestStatus>().ToList();
+
+            var totalCount = await orderedQuery.CountAsync();
+            var requests = await orderedQuery
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
 
-            return View(requests);
+            return View(new ZEGU.WebApp.ViewModels.PagedResult<ZEGU.Core.Entities.Maintenance.MaintenanceRequest>
+            {
+                Items = requests,
+                TotalCount = totalCount,
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            });
         }
 
         public async Task<IActionResult> Details(int id)

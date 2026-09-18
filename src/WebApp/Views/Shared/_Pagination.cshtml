@@ -1,9 +1,19 @@
-@model ZEGU.WebApp.ViewModels.PagedResult<object>
+@model ZEGU.WebApp.ViewModels.IPagingInfo
+@using Microsoft.AspNetCore.WebUtilities
 @{
     var action = ViewContext.RouteData.Values["action"]?.ToString();
     var controller = ViewContext.RouteData.Values["controller"]?.ToString();
     var area = ViewContext.RouteData.Values["area"]?.ToString();
-    var queryString = Context.Request.QueryString.HasValue ? Context.Request.QueryString.Value : "";
+
+    string PageUrl(int page)
+    {
+        var baseUrl = Url.Action(action, controller, new { area }) ?? "";
+        var query = Context.Request.Query
+            .Where(q => !string.Equals(q.Key, "pageNumber", StringComparison.OrdinalIgnoreCase))
+            .ToDictionary(q => q.Key, q => (string?)q.Value.ToString());
+        query["pageNumber"] = page.ToString();
+        return QueryHelpers.AddQueryString(baseUrl, query);
+    }
 }
 
 @if (Model.TotalPages > 1)
@@ -13,10 +23,7 @@
             @if (Model.HasPreviousPage)
             {
                 <li class="page-item">
-                    <a class="page-link" 
-                       href="@Url.Action(action, controller, new { area, pageNumber = Model.PageNumber - 1, pageSize = Model.PageSize })@queryString">
-                        Previous
-                    </a>
+                    <a class="page-link" href="@PageUrl(Model.PageNumber - 1)">Previous</a>
                 </li>
             }
             else
@@ -29,20 +36,14 @@
             @for (int i = Math.Max(1, Model.PageNumber - 2); i <= Math.Min(Model.TotalPages, Model.PageNumber + 2); i++)
             {
                 <li class="page-item @(i == Model.PageNumber ? "active" : "")">
-                    <a class="page-link" 
-                       href="@Url.Action(action, controller, new { area, pageNumber = i, pageSize = Model.PageSize })@queryString">
-                        @i
-                    </a>
+                    <a class="page-link" href="@PageUrl(i)">@i</a>
                 </li>
             }
 
             @if (Model.HasNextPage)
             {
                 <li class="page-item">
-                    <a class="page-link" 
-                       href="@Url.Action(action, controller, new { area, pageNumber = Model.PageNumber + 1, pageSize = Model.PageSize })@queryString">
-                        Next
-                    </a>
+                    <a class="page-link" href="@PageUrl(Model.PageNumber + 1)">Next</a>
                 </li>
             }
             else
@@ -53,8 +54,8 @@
             }
         </ul>
         <div class="text-center text-muted small">
-            Showing @((Model.PageNumber - 1) * Model.PageSize + 1) to 
-            @(Math.Min(Model.PageNumber * Model.PageSize, Model.TotalCount)) of 
+            Showing @((Model.PageNumber - 1) * Model.PageSize + 1) to
+            @(Math.Min(Model.PageNumber * Model.PageSize, Model.TotalCount)) of
             @Model.TotalCount entries
         </div>
     </nav>

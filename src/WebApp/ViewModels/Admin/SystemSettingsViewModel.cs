@@ -3,10 +3,7 @@ namespace ZEGU.WebApp.ViewModels.Admin
     public class SystemSettingsViewModel
     {
         public string AdminEmail { get; set; } = string.Empty;
-        public int SLAEmergency { get; set; }
-        public int SLAHigh { get; set; }
-        public int SLANormal { get; set; }
-        public int SLALow { get; set; }
+        public List<CategorySlaSummary> CategorySlaHours { get; set; } = new();
         public int MaxFileSize { get; set; }
         public string AppUrl { get; set; } = string.Empty;
         public string QrCodeApiUrl { get; set; } = string.Empty;
@@ -17,5 +14,12 @@ namespace ZEGU.WebApp.ViewModels.Admin
         public int TotalAssets { get; set; }
         public int TotalSchedules { get; set; }
         public int UnreadNotifications { get; set; }
+    }
+
+    public class CategorySlaSummary
+    {
+        public int Id { get; set; }
+        public string CategoryName { get; set; } = string.Empty;
+        public int SLAHours { get; set; }
     }
 }

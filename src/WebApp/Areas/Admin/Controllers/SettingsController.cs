@@ -24,13 +24,16 @@ namespace ZEGU.WebApp.Areas.Admin.Controllers
 
         public async Task<IActionResult> Index()
         {
+            var categorySla = await _context.MaintenanceCategories
+                .Where(c => c.IsActive)
+                .OrderBy(c => c.CategoryName)
+                .Select(c => new CategorySlaSummary { Id = c.Id, CategoryName = c.CategoryName, SLAHours = c.SLAHours ?? 0 })
+                .ToListAsync();
+
             var viewModel = new SystemSettingsViewModel
             {
-                AdminEmail = _configuration["AdminSettings:Email"] ?? "admin@university.edu",
-                SLAEmergency = _configuration.GetValue<int>("SLA:Emergency", 2),
-                SLAHigh = _configuration.GetValue<int>("SLA:High", 4),
-                SLANormal = _configuration.GetValue<int>("SLA:Normal", 24),
-                SLALow = _configuration.GetValue<int>("SLA:Low", 48),
+                AdminEmail = _configuration["AdminSettings:Email"] ?? "",
+                CategorySlaHours = categorySla,
                 MaxFileSize = _configuration.GetValue<int>("Uploads:MaxFileSize", 5),
                 AppUrl = _configuration["AppUrl"] ?? "http://localhost:5259",
                 QrCodeApiUrl = _configuration["QrCodeApiUrl"] ?? "https://api.qrserver.com/v1/create-qr-code/",
@@ -44,28 +47,6 @@ namespace ZEGU.WebApp.Areas.Admin.Controllers
             };
 
             return View(viewModel);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> UpdateSlaSettings(int emergency, int high, int normal, int low)
-        {
-            _configuration["SLA:Emergency"] = emergency.ToString();
-            _configuration["SLA:High"] = high.ToString();
-            _configuration["SLA:Normal"] = normal.ToString();
-            _configuration["SLA:Low"] = low.ToString();
-
-            TempData["SuccessMessage"] = "SLA settings updated successfully!";
-            return RedirectToAction(nameof(Index));
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> UpdateAdminEmail(string email, string password)
-        {
-            _configuration["AdminSettings:Email"] = email;
-            _configuration["AdminSettings:Password"] = password;
-
-            TempData["SuccessMessage"] = "Admin credentials updated. Please update database to take effect.";
-            return RedirectToAction(nameof(Index));
         }
     }
 }

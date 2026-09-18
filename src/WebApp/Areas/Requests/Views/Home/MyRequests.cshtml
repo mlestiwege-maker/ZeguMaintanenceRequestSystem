@@ -1,4 +1,4 @@
-@model List<ZEGU.Core.Entities.Maintenance.MaintenanceRequest>
+@model ZEGU.WebApp.ViewModels.PagedResult<ZEGU.Core.Entities.Maintenance.MaintenanceRequest>
 
 @{
     ViewData["Title"] = "My Requests";
@@ -14,7 +14,34 @@
     </a>
 </div>
 
-@if (Model.Any())
+<div class="filter-bar">
+    <form method="get" asp-action="MyRequests" class="row g-3">
+        <div class="col-md-6">
+            <label class="form-label small">Search</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                <input type="text" name="search" class="form-control" placeholder="Search my requests..." value="@ViewBag.SearchTerm" />
+            </div>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label small">Status</label>
+            <select name="status" class="form-select">
+                <option value="">All Statuses</option>
+                @foreach (var status in ViewBag.Statuses)
+                {
+                    <option value="@status" selected="@(Context.Request.Query["status"] == status.ToString() ? "selected" : null)">@status</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary w-100" title="Apply Filters">
+                <i class="bi bi-funnel"></i> Filter
+            </button>
+        </div>
+    </form>
+</div>
+
+@if (Model.Items.Any())
 {
     <div class="card">
         <div class="card-body">
@@ -33,7 +60,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var request in Model)
+                        @foreach (var request in Model.Items)
                         {
                             <tr>
                                 <td><strong>@request.RequestNumber</strong></td>
@@ -67,18 +94,31 @@
             </div>
         </div>
     </div>
+    @await Html.PartialAsync("_Pagination", Model)
 }
 else
 {
+    var hasActiveFilter = !string.IsNullOrEmpty(Context.Request.Query["search"]) || !string.IsNullOrEmpty(Context.Request.Query["status"]);
     <div class="card">
         <div class="card-body">
             <div class="empty-state">
                 <i class="bi bi-inbox"></i>
-                <h4>No requests found</h4>
-                <p>You haven't submitted any maintenance requests yet.</p>
-                <a asp-action="Create" class="btn btn-primary">
-                    <i class="bi bi-plus-circle"></i> Submit Your First Request
-                </a>
+                @if (hasActiveFilter)
+                {
+                    <h4>No matching requests</h4>
+                    <p>No requests match your search or filter. Try clearing them.</p>
+                    <a asp-action="MyRequests" class="btn btn-secondary">
+                        <i class="bi bi-x-circle"></i> Clear Filters
+                    </a>
+                }
+                else
+                {
+                    <h4>No requests found</h4>
+                    <p>You haven't submitted any maintenance requests yet.</p>
+                    <a asp-action="Create" class="btn btn-primary">
+                        <i class="bi bi-plus-circle"></i> Submit Your First Request
+                    </a>
+                }
             </div>
         </div>
     </div>

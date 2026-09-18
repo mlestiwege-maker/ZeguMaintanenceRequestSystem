@@ -1,4 +1,4 @@
-@model List<ZEGU.Core.Entities.Identity.ApplicationUser>
+@model ZEGU.WebApp.ViewModels.PagedResult<ZEGU.Core.Entities.Identity.ApplicationUser>
 
 @{
     ViewData["Title"] = "Manage Users";
@@ -12,6 +12,23 @@
     <a asp-action="Create" class="btn btn-primary">
         <i class="bi bi-person-plus"></i> Add New User
     </a>
+</div>
+
+<div class="filter-bar">
+    <form method="get" asp-action="Index" class="row g-3">
+        <div class="col-md-4">
+            <label class="form-label small">Search</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                <input type="text" name="search" class="form-control" placeholder="Search name, email, username..." value="@ViewBag.SearchTerm" />
+            </div>
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary w-100" title="Apply Filter">
+                <i class="bi bi-funnel"></i> Filter
+            </button>
+        </div>
+    </form>
 </div>
 
 <div class="card">
@@ -30,7 +47,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var user in Model)
+                    @foreach (var user in Model.Items)
                     {
                         <tr>
                             <td>@user.FirstName @user.LastName</td>
@@ -65,3 +82,5 @@
         </div>
     </div>
 </div>
+
+@await Html.PartialAsync("_Pagination", Model)

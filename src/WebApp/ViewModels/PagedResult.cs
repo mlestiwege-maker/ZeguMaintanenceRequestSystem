@@ -1,6 +1,16 @@
 namespace ZEGU.WebApp.ViewModels
 {
-    public class PagedResult<T>
+    public interface IPagingInfo
+    {
+        int TotalCount { get; }
+        int PageNumber { get; }
+        int PageSize { get; }
+        int TotalPages { get; }
+        bool HasPreviousPage { get; }
+        bool HasNextPage { get; }
+    }
+
+    public class PagedResult<T> : IPagingInfo
     {
         public List<T> Items { get; set; } = new();
         public int TotalCount { get; set; }

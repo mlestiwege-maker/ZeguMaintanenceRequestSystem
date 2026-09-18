@@ -8,6 +8,7 @@ using ZEGU.Core.Entities.Identity;
 using ZEGU.Infrastructure.Data;
 using ZEGU.Infrastructure.Services;
 using ZEGU.WebApp.ViewModels.Works;
+using System.Security.Claims;
 
 namespace ZEGU.WebApp.Areas.Works.Controllers
 {
@@ -18,12 +19,14 @@ namespace ZEGU.WebApp.Areas.Works.Controllers
         private readonly ApplicationDbContext _context;
         private readonly NotificationService _notificationService;
         private readonly SLAMonitoringService _slaMonitoringService;
+        private readonly AuditService _auditService;
 
-        public HomeController(ApplicationDbContext context, NotificationService notificationService, SLAMonitoringService slaMonitoringService)
+        public HomeController(ApplicationDbContext context, NotificationService notificationService, SLAMonitoringService slaMonitoringService, AuditService auditService)
         {
             _context = context;
             _notificationService = notificationService;
             _slaMonitoringService = slaMonitoringService;
+            _auditService = auditService;
         }
 
         public async Task<IActionResult> Index()
@@ -51,8 +54,9 @@ namespace ZEGU.WebApp.Areas.Works.Controllers
             return View(stats);
         }
 
-        public async Task<IActionResult> AllRequests(string? search = null, string? status = null, string? priority = null, 
-            int? categoryId = null, int? technicianId = null, DateTime? startDate = null, DateTime? endDate = null)
+        public async Task<IActionResult> AllRequests(string? search = null, string? status = null, string? priority = null,
+            int? categoryId = null, int? technicianId = null, DateTime? startDate = null, DateTime? endDate = null,
+            int pageNumber = 1, int pageSize = 25)
         {
             var query = _context.MaintenanceRequests
                 .Include(r => r.User)
@@ -112,7 +116,16 @@ namespace ZEGU.WebApp.Areas.Works.Controllers
                 query = query.Where(r => r.CreatedAt <= end);
             }
 
-            var requests = await query.OrderByDescending(r => r.CreatedAt).ToListAsync();
+            pageSize = Math.Clamp(pageSize, 1, 100);
+            pageNumber = Math.Max(1, pageNumber);
+
+            var orderedQuery = query.OrderByDescending(r => r.CreatedAt);
+            var totalCount = await orderedQuery.CountAsync();
+            var requests = await orderedQuery
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
             ViewBag.Categories = await _context.MaintenanceCategories.Where(c => c.IsActive).ToListAsync();
             ViewBag.Technicians = await _context.Technicians.Include(t => t.User).Where(t => t.IsActive).ToListAsync();
             ViewBag.Statuses = Enum.GetValues(typeof(MaintenanceRequestStatus)).Cast<MaintenanceRequestStatus>().ToList();
@@ -122,7 +135,14 @@ namespace ZEGU.WebApp.Areas.Works.Controllers
             ViewBag.EndDate = endDate;
             ViewBag.SelectedCategoryId = categoryId;
             ViewBag.SelectedTechnicianId = technicianId;
-            return View(requests);
+
+            return View(new ZEGU.WebApp.ViewModels.PagedResult<ZEGU.Core.Entities.Maintenance.MaintenanceRequest>
+            {
+                Items = requests,
+                TotalCount = totalCount,
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            });
         }
 
         public async Task<IActionResult> ExportRequestsCsv(string? search = null, string? status = null, string? priority = null, 
@@ -222,6 +242,10 @@ namespace ZEGU.WebApp.Areas.Works.Controllers
 
             await _context.SaveChangesAsync();
 
+            await _auditService.LogAsync(user.Id, user.UserName, "AssignTechnician", "MaintenanceRequest",
+                entityId: request.Id, newValues: new { TechnicianId = technicianId, technician.TechnicianType },
+                ipAddress: HttpContext.Connection.RemoteIpAddress?.ToString());
+
             if (technician.UserId != null)
             {
                 var techUser = await _context.Users.FindAsync(technician.UserId);
@@ -285,10 +309,24 @@ namespace ZEGU.WebApp.Areas.Works.Controllers
 
                 if (afterPhoto != null && afterPhoto.Length > 0)
                 {
+                    if (afterPhoto.Length > 5 * 1024 * 1024)
+                    {
+                        TempData["ErrorMessage"] = "File size must be less than 5MB";
+                        return RedirectToAction(nameof(UpdateStatus), new { id });
+                    }
+
+                    var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp" };
+                    var afterPhotoExtension = Path.GetExtension(afterPhoto.FileName).ToLower();
+                    if (!allowedExtensions.Contains(afterPhotoExtension))
+                    {
+                        TempData["ErrorMessage"] = "Only image files are allowed (jpg, jpeg, png, gif, bmp)";
+                        return RedirectToAction(nameof(UpdateStatus), new { id });
+                    }
+
                     var uploadsFolder = Path.Combine("wwwroot", "uploads", "after-photos");
                     Directory.CreateDirectory(uploadsFolder);
 
-                    var fileName = $"after-{id}-{Guid.NewGuid()}{Path.GetExtension(afterPhoto.FileName)}";
+                    var fileName = $"after-{id}-{Guid.NewGuid()}{afterPhotoExtension}";
                     var filePath = Path.Combine(uploadsFolder, fileName);
 
                     using (var stream = new FileStream(filePath, FileMode.Create))
@@ -325,6 +363,10 @@ namespace ZEGU.WebApp.Areas.Works.Controllers
             });
 
             await _context.SaveChangesAsync();
+
+            await _auditService.LogAsync(user.Id, user.UserName, "UpdateStatus", "MaintenanceRequest",
+                entityId: request.Id, oldValues: new { Status = oldStatus }, newValues: new { Status = newStatus, comments },
+                ipAddress: HttpContext.Connection.RemoteIpAddress?.ToString());
 
             await _notificationService.CreateNotificationAsync(request.UserId,
                 "Request Status Updated",
@@ -373,8 +415,12 @@ namespace ZEGU.WebApp.Areas.Works.Controllers
 
             await _context.SaveChangesAsync();
 
-            await _notificationService.CreateNotificationAsync(request.UserId, 
-                "Request Rejected", 
+            await _auditService.LogAsync(user.Id, user.UserName, "Reject", "MaintenanceRequest",
+                entityId: request.Id, newValues: new { rejectionReason },
+                ipAddress: HttpContext.Connection.RemoteIpAddress?.ToString());
+
+            await _notificationService.CreateNotificationAsync(request.UserId,
+                "Request Rejected",
                 $"Your request {request.RequestNumber} has been rejected. Reason: {rejectionReason}", 
                 request.Id);
 
@@ -446,16 +492,20 @@ namespace ZEGU.WebApp.Areas.Works.Controllers
             _context.RequestStatusHistory.Add(new RequestStatusHistory
             {
                 RequestId = id,
-                OldStatus = (MaintenanceRequestStatus)(int)oldPriority,
-                NewStatus = (MaintenanceRequestStatus)(int)newPriority,
+                OldStatus = request.Status,
+                NewStatus = request.Status,
                 ChangedById = user.Id,
                 Comments = $"Priority changed from {oldPriority} to {newPriority}" + (string.IsNullOrEmpty(comments) ? "" : $": {comments}")
             });
 
             await _context.SaveChangesAsync();
 
-            await _notificationService.CreateNotificationAsync(request.UserId, 
-                "Request Priority Updated", 
+            await _auditService.LogAsync(user.Id, user.UserName, "UpdatePriority", "MaintenanceRequest",
+                entityId: request.Id, oldValues: new { Priority = oldPriority }, newValues: new { Priority = newPriority, comments },
+                ipAddress: HttpContext.Connection.RemoteIpAddress?.ToString());
+
+            await _notificationService.CreateNotificationAsync(request.UserId,
+                "Request Priority Updated",
                 $"Your request {request.RequestNumber} priority has been changed to {newPriority}", 
                 request.Id);
 

@@ -15,10 +15,21 @@ namespace ZEGU.WebApp.Areas.Admin.Controllers
             _auditService = auditService;
         }
 
-        public async Task<IActionResult> Index(string? entityType = null, string? userId = null, int count = 100)
+        public async Task<IActionResult> Index(string? entityType = null, string? userId = null,
+            int pageNumber = 1, int pageSize = 50)
         {
-            var logs = await _auditService.GetRecentLogsAsync(count, entityType, userId);
-            return View(logs);
+            pageSize = Math.Clamp(pageSize, 1, 200);
+            pageNumber = Math.Max(1, pageNumber);
+
+            var (items, totalCount) = await _auditService.GetPagedLogsAsync(pageNumber, pageSize, entityType, userId);
+
+            return View(new ZEGU.WebApp.ViewModels.PagedResult<ZEGU.Core.Entities.Maintenance.AuditLog>
+            {
+                Items = items,
+                TotalCount = totalCount,
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            });
         }
     }
 }

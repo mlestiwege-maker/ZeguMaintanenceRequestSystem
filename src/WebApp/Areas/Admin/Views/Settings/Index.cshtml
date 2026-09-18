@@ -53,33 +53,33 @@
     <div class="col-md-9">
         <div class="card mb-4">
             <div class="card-header">
-                <i class="bi bi-clock"></i> SLA Settings
+                <i class="bi bi-clock"></i> SLA Hours by Category
             </div>
             <div class="card-body">
-                <form asp-action="UpdateSlaSettings" method="post">
-                    @Html.AntiForgeryToken()
-                    <div class="row">
-                        <div class="col-md-3 mb-3">
-                            <label class="form-label">Emergency (hours)</label>
-                            <input type="number" name="emergency" class="form-control" value="@Model.SLAEmergency" />
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <label class="form-label">High (hours)</label>
-                            <input type="number" name="high" class="form-control" value="@Model.SLAHigh" />
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <label class="form-label">Normal (hours)</label>
-                            <input type="number" name="normal" class="form-control" value="@Model.SLANormal" />
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <label class="form-label">Low (hours)</label>
-                            <input type="number" name="low" class="form-control" value="@Model.SLALow" />
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-check-lg"></i> Save SLA Settings
-                    </button>
-                </form>
+                <p class="text-muted small">SLA hours are enforced per maintenance category. Edit a category to change its SLA target.</p>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>SLA (hours)</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var cat in Model.CategorySlaHours)
+                        {
+                            <tr>
+                                <td>@cat.CategoryName</td>
+                                <td>@cat.SLAHours</td>
+                                <td>
+                                    <a asp-controller="Categories" asp-action="Edit" asp-route-id="@cat.Id" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-pencil"></i> Edit
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
             </div>
         </div>
 

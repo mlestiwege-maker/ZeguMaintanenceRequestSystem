@@ -49,5 +49,26 @@ namespace ZEGU.Infrastructure.Services
                 .Take(count)
                 .ToListAsync();
         }
+
+        public async Task<(List<AuditLog> Items, int TotalCount)> GetPagedLogsAsync(
+            int pageNumber, int pageSize, string? entityType = null, string? userId = null)
+        {
+            var query = _context.AuditLogs.AsQueryable();
+
+            if (!string.IsNullOrEmpty(entityType))
+                query = query.Where(l => l.EntityType == entityType);
+
+            if (!string.IsNullOrEmpty(userId))
+                query = query.Where(l => l.UserId == userId);
+
+            var ordered = query.OrderByDescending(l => l.CreatedAt);
+            var totalCount = await ordered.CountAsync();
+            var items = await ordered
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (items, totalCount);
+        }
     }
 }
