@@ -10,12 +10,14 @@ using ZEGU.Core.Entities.Identity;
 
 namespace ZEGU.WebApp.Controllers
 {
-    [Authorize]
+[Authorize]
     public class NotificationsController : Controller
     {
         private readonly ApplicationDbContext _context;
         private readonly NotificationService _notificationService;
         private readonly UserManager<ApplicationUser> _userManager;
+
+        private string? CurrentUserName => User.Identity?.Name;
 
         public NotificationsController(ApplicationDbContext context, NotificationService notificationService, UserManager<ApplicationUser> userManager)
         {
@@ -26,7 +28,9 @@ namespace ZEGU.WebApp.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var user = await _userManager.FindByNameAsync(User.Identity.Name);
+            var userName = CurrentUserName;
+            if (string.IsNullOrEmpty(userName)) return RedirectToAction("Login", "Account", new { area = "" });
+            var user = await _userManager.FindByNameAsync(userName);
             if (user == null) return RedirectToAction("Login", "Account", new { area = "" });
 
             var notifications = await _context.Notifications
@@ -41,7 +45,9 @@ namespace ZEGU.WebApp.Controllers
         [HttpPost]
         public async Task<IActionResult> MarkAsRead(int id)
         {
-            var user = await _userManager.FindByNameAsync(User.Identity.Name);
+            var userName = CurrentUserName;
+            if (string.IsNullOrEmpty(userName)) return RedirectToAction("Login", "Account", new { area = "" });
+            var user = await _userManager.FindByNameAsync(userName);
             if (user == null) return RedirectToAction("Login", "Account", new { area = "" });
 
             await _notificationService.MarkAsReadAsync(id, user.Id);
@@ -51,7 +57,9 @@ namespace ZEGU.WebApp.Controllers
         [HttpPost]
         public async Task<IActionResult> MarkAllAsRead()
         {
-            var user = await _userManager.FindByNameAsync(User.Identity.Name);
+            var userName = CurrentUserName;
+            if (string.IsNullOrEmpty(userName)) return RedirectToAction("Login", "Account", new { area = "" });
+            var user = await _userManager.FindByNameAsync(userName);
             if (user == null) return RedirectToAction("Login", "Account", new { area = "" });
 
             await _notificationService.MarkAllAsReadAsync(user.Id);
@@ -61,7 +69,9 @@ namespace ZEGU.WebApp.Controllers
         [HttpGet]
         public async Task<IActionResult> UnreadCount()
         {
-            var user = await _userManager.FindByNameAsync(User.Identity.Name);
+            var userName = CurrentUserName;
+            if (string.IsNullOrEmpty(userName)) return Json(0);
+            var user = await _userManager.FindByNameAsync(userName);
             if (user == null) return Json(0);
 
             var count = await _notificationService.GetUnreadCountAsync(user.Id);

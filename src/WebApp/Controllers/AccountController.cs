@@ -14,6 +14,8 @@ namespace ZEGU.WebApp.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly DataExportService _dataExportService;
 
+        private string? CurrentUserName => User.Identity?.Name;
+
         public AccountController(SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager, DataExportService dataExportService)
         {
             _signInManager = signInManager;
@@ -125,7 +127,9 @@ namespace ZEGU.WebApp.Controllers
         [HttpGet]
         public async Task<IActionResult> Profile()
         {
-            var user = await _userManager.FindByNameAsync(User.Identity.Name);
+            var userName = CurrentUserName;
+            if (string.IsNullOrEmpty(userName)) return RedirectToAction("Login", "Account", new { area = "" });
+            var user = await _userManager.FindByNameAsync(userName);
             if (user == null) return RedirectToAction("Login", "Account", new { area = "" });
             return View(user);
         }
@@ -133,7 +137,9 @@ namespace ZEGU.WebApp.Controllers
         [HttpGet]
         public async Task<IActionResult> EditProfile()
         {
-            var user = await _userManager.FindByNameAsync(User.Identity.Name);
+            var userName = CurrentUserName;
+            if (string.IsNullOrEmpty(userName)) return RedirectToAction("Login", "Account", new { area = "" });
+            var user = await _userManager.FindByNameAsync(userName);
             if (user == null) return RedirectToAction("Login", "Account", new { area = "" });
             return View(user);
         }
@@ -141,7 +147,9 @@ namespace ZEGU.WebApp.Controllers
         [HttpPost]
         public async Task<IActionResult> EditProfile(string firstName, string lastName, string email, string? phoneNumber = null)
         {
-            var user = await _userManager.FindByNameAsync(User.Identity.Name);
+            var userName = CurrentUserName;
+            if (string.IsNullOrEmpty(userName)) return RedirectToAction("Login", "Account", new { area = "" });
+            var user = await _userManager.FindByNameAsync(userName);
             if (user == null) return RedirectToAction("Login", "Account", new { area = "" });
 
             user.FirstName = firstName;
@@ -181,7 +189,9 @@ namespace ZEGU.WebApp.Controllers
                 return View();
             }
 
-            var user = await _userManager.FindByNameAsync(User.Identity.Name);
+            var userName = CurrentUserName;
+            if (string.IsNullOrEmpty(userName)) return RedirectToAction("Login", "Account", new { area = "" });
+            var user = await _userManager.FindByNameAsync(userName);
             if (user == null) return RedirectToAction("Login", "Account", new { area = "" });
 
             var result = await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
@@ -202,7 +212,9 @@ namespace ZEGU.WebApp.Controllers
         [HttpGet]
         public async Task<IActionResult> ExportMyData()
         {
-            var user = await _userManager.FindByNameAsync(User.Identity.Name);
+            var userName = CurrentUserName;
+            if (string.IsNullOrEmpty(userName)) return RedirectToAction("Login", "Account", new { area = "" });
+            var user = await _userManager.FindByNameAsync(userName);
             if (user == null) return RedirectToAction("Login", "Account", new { area = "" });
 
             var data = await _dataExportService.ExportUserDataAsync(user.Id);

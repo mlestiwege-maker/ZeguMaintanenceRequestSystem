@@ -34,9 +34,9 @@ namespace ZEGU.WebApp.Areas.Admin.Controllers
             {
                 query = query.Where(a =>
                     a.AssetName.Contains(searchString) ||
-                    a.AssetCode.Contains(searchString) ||
-                    a.SerialNumber.Contains(searchString) ||
-                    a.Manufacturer.Contains(searchString));
+                    (a.AssetCode != null && a.AssetCode.Contains(searchString)) ||
+                    (a.SerialNumber != null && a.SerialNumber.Contains(searchString)) ||
+                    (a.Manufacturer != null && a.Manufacturer.Contains(searchString)));
             }
 
             if (categoryId.HasValue)
@@ -87,6 +87,11 @@ namespace ZEGU.WebApp.Areas.Admin.Controllers
         {
             if (ModelState.IsValid)
             {
+                if (string.IsNullOrWhiteSpace(asset.AssetCode))
+                {
+                    asset.AssetCode = GenerateAssetCode();
+                }
+
                 _context.Assets.Add(asset);
                 await _context.SaveChangesAsync();
 
@@ -111,6 +116,13 @@ namespace ZEGU.WebApp.Areas.Admin.Controllers
             ViewBag.Locations = new SelectList(await _context.Rooms.Where(r => r.IsActive).ToListAsync(), "Id", "RoomNumber", asset.LocationId);
             ViewBag.Statuses = new SelectList(new[] { "Operational", "UnderMaintenance", "OutOfService", "Disposed" }, asset.Status);
             return View(asset);
+        }
+
+        private string GenerateAssetCode()
+        {
+            var lastAsset = _context.Assets.OrderByDescending(a => a.Id).FirstOrDefault();
+            var nextId = (lastAsset?.Id ?? 0) + 1;
+            return $"AST-{nextId:D4}";
         }
 
         public async Task<IActionResult> Edit(int id)

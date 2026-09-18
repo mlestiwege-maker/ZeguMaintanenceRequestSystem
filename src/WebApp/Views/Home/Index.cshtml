@@ -2,34 +2,57 @@
     ViewData["Title"] = "Home";
 }
 
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card border-0 shadow-sm">
-            <div class="card-body p-5 text-center" style="background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%); color: white; border-radius: 0.5rem;">
-                <i class="bi bi-tools" style="font-size: 3.5rem; opacity: 0.9;"></i>
-                <h1 class="mt-3 fw-bold">Welcome to ZEGU Maintenance</h1>
-                <p class="lead mb-4 opacity-75">Your central hub for submitting and tracking maintenance requests across campus.</p>
-                @if (User.Identity.IsAuthenticated)
-                {
-                    @if (User.IsInRole("Student") || User.IsInRole("Staff"))
+<div class="card hero-card mb-4">
+    <div class="card-body text-center text-lg-start">
+        <div class="hero-eyebrow mb-3">
+            <i class="bi bi-phone"></i>
+            Mobile-first campus maintenance
+        </div>
+        <div class="row align-items-center g-4">
+            <div class="col-lg-7">
+                <i class="bi bi-tools d-inline-flex align-items-center justify-content-center mb-3" style="font-size: 3rem;"></i>
+                <h1 class="fw-bold">Welcome to ZEGU Maintenance</h1>
+                <p class="lead mb-4">Submit, track, and manage campus maintenance requests from any device with a cleaner, faster experience built for mobile.</p>
+                <div class="hero-actions justify-content-center justify-content-lg-start">
+                    @if (User.Identity.IsAuthenticated)
                     {
-                        <a asp-area="Requests" asp-controller="Home" asp-action="Create" class="btn btn-light btn-lg me-2">
-                            <i class="bi bi-plus-circle"></i> New Request
+                        @if (User.IsInRole("Student") || User.IsInRole("Staff"))
+                        {
+                            <a asp-area="Requests" asp-controller="Home" asp-action="Create" class="btn btn-light btn-lg">
+                                <i class="bi bi-plus-circle"></i> New Request
+                            </a>
+                        }
+                        <a asp-area="" asp-controller="Account" asp-action="Profile" class="btn btn-outline-light btn-lg">
+                            <i class="bi bi-person-circle"></i> My Profile
                         </a>
                     }
-                    <a asp-area="" asp-controller="Account" asp-action="Profile" class="btn btn-outline-light btn-lg">
-                        <i class="bi bi-person-circle"></i> My Profile
-                    </a>
-                }
-                else
-                {
-                    <a asp-area="" asp-controller="Account" asp-action="Login" class="btn btn-light btn-lg me-2">
-                        <i class="bi bi-box-arrow-in-right"></i> Sign In
-                    </a>
-                    <a asp-area="" asp-controller="Account" asp-action="Register" class="btn btn-outline-light btn-lg">
-                        <i class="bi bi-person-plus"></i> Register
-                    </a>
-                }
+                    else
+                    {
+                        <a asp-area="" asp-controller="Account" asp-action="Login" class="btn btn-light btn-lg">
+                            <i class="bi bi-box-arrow-in-right"></i> Sign In
+                        </a>
+                        <a asp-area="" asp-controller="Account" asp-action="Register" class="btn btn-outline-light btn-lg">
+                            <i class="bi bi-person-plus"></i> Register
+                        </a>
+                    }
+                </div>
+            </div>
+
+            <div class="col-lg-5">
+                <div class="feature-grid">
+                    <div class="card feature-card text-start">
+                        <div class="card-body">
+                            <h5 class="card-title"><i class="bi bi-speedometer2 me-2"></i>Fast access</h5>
+                            <p class="mb-0 opacity-75">Big touch targets, compact navigation, and key actions surfaced first.</p>
+                        </div>
+                    </div>
+                    <div class="card feature-card text-start">
+                        <div class="card-body">
+                            <h5 class="card-title"><i class="bi bi-shield-check me-2"></i>Better clarity</h5>
+                            <p class="mb-0 opacity-75">Simplified layout makes requests, updates, and status checks easier on small screens.</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -37,8 +60,8 @@
 
 @if (User.Identity.IsAuthenticated)
 {
-    <div class="row mb-4">
-        <div class="col-md-4">
+    <div class="row row-cols-1 row-cols-md-3 g-3 dashboard-section">
+        <div class="col">
             <div class="card stat-card bg-primary text-white h-100">
                 <div class="card-body">
                     <div>
@@ -62,7 +85,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col">
             <div class="card stat-card bg-success text-white h-100">
                 <div class="card-body">
                     <div>
@@ -86,7 +109,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col">
             <div class="card stat-card bg-info text-white h-100">
                 <div class="card-body">
                     <div>

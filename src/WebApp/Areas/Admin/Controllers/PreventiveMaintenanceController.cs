@@ -123,7 +123,11 @@ namespace ZEGU.WebApp.Areas.Admin.Controllers
 
             if (schedule == null) return NotFound();
 
-            var userId = _context.Users.FirstOrDefault(u => u.UserName == User.Identity.Name)?.Id;
+            var currentUserName = User.Identity?.Name ?? string.Empty;
+            var userId = _context.Users
+                .Where(u => u.UserName == currentUserName)
+                .Select(u => u.Id)
+                .FirstOrDefault();
 
             var record = new PreventiveMaintenanceRecord
             {

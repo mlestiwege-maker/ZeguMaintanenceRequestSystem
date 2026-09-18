@@ -10,12 +10,14 @@ using ZEGU.Core.Entities.Identity;
 
 namespace ZEGU.WebApp.Areas.Works.Controllers
 {
-    [Area("Works")]
+[Area("Works")]
     [Authorize(Policy = "RequireWorksAccess")]
     public class WorkLogsController : Controller
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
+
+        private string? CurrentUserName => User.Identity?.Name;
 
         public WorkLogsController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
@@ -59,7 +61,9 @@ namespace ZEGU.WebApp.Areas.Works.Controllers
         public async Task<IActionResult> Create(int requestId, string workPerformed, decimal? hoursSpent, int? technicianId, 
             DateTime? startedAt, DateTime? completedAt, decimal? laborRate = null)
         {
-            var user = await _userManager.FindByNameAsync(User.Identity.Name);
+            var userName = CurrentUserName;
+            if (string.IsNullOrEmpty(userName)) return RedirectToAction("Login", "Account", new { area = "" });
+            var user = await _userManager.FindByNameAsync(userName);
             if (user == null) return RedirectToAction("Login", "Account", new { area = "" });
 
             var workLog = new WorkLog

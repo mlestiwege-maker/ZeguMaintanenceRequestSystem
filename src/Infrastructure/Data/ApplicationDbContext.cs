@@ -223,7 +223,7 @@ namespace ZEGU.Infrastructure.Data
 
             builder.Entity<Asset>()
                 .HasMany(a => a.MaintenanceRequests)
-                .WithOne()
+                .WithOne(r => r.Asset)
                 .HasForeignKey(r => r.AssetId)
                 .OnDelete(DeleteBehavior.Restrict);
 
