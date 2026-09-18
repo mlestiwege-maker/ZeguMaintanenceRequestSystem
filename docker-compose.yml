@@ -13,10 +13,11 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:8080
-      - ConnectionStrings__DefaultConnection=Host=zegu-db;Port=5432;Database=ZEGU;Username=zegu;Password=${DB_PASSWORD:-ZEGU_SecurePass_2026}
-      - AdminSettings__Email=${ADMIN_EMAIL:-admin@zegu.ac.zw}
-      - AdminSettings__Password=${ADMIN_PASSWORD:-ChangeMe123!@#}
+      - ConnectionStrings__DefaultConnection=Host=zegu-db;Port=5432;Database=ZEGU;Username=zegu;Password=${DB_PASSWORD:?DB_PASSWORD must be set in .env}
+      - AdminSettings__Email=${ADMIN_EMAIL:?ADMIN_EMAIL must be set in .env}
+      - AdminSettings__Password=${ADMIN_PASSWORD:?ADMIN_PASSWORD must be set in .env}
       - AppUrl=${APP_URL:-http://localhost:8080}
+      - "Jwt__Key=${JWT_KEY:?JWT_KEY must be set in .env, see .env.example}"
     depends_on:
       zegu-db:
         condition: service_healthy
@@ -38,7 +39,7 @@ services:
     environment:
       - POSTGRES_DB=ZEGU
       - POSTGRES_USER=zegu
-      - POSTGRES_PASSWORD=${DB_PASSWORD:-ZEGU_SecurePass_2026}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:?DB_PASSWORD must be set in .env}
       - PGDATA=/var/lib/postgresql/data/pgdata
     volumes:
       - zegu-db-data:/var/lib/postgresql/data
@@ -55,8 +56,8 @@ services:
     container_name: zegu-pgadmin
     restart: unless-stopped
     environment:
-      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL:-admin@zegu.ac.zw}
-      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD:-admin}
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL:?PGADMIN_EMAIL must be set in .env}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD:?PGADMIN_PASSWORD must be set in .env}
     ports:
       - "5050:80"
     depends_on:

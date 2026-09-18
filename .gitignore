@@ -45,6 +45,10 @@ Migrations/*.Designer.cs
 *.db
 *.sqlite
 
+# Secrets
+.env
+appsettings.*.local.json
+
 # OS generated files
 .DS_Store
 .DS_Store?

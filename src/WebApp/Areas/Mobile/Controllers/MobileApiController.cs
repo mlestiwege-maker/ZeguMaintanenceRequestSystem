@@ -1,6 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 using ZEGU.Core.Entities.Maintenance;
 using ZEGU.Core.Enums;
 using ZEGU.Infrastructure.Data;
@@ -12,19 +17,25 @@ namespace ZEGU.WebApp.Areas.Mobile.Controllers
     [Area("Mobile")]
     [ApiController]
     [Route("api/mobile/[action]")]
-    [AllowAnonymous]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class MobileApiController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IConfiguration _configuration;
 
-        public MobileApiController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+        public MobileApiController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, IConfiguration configuration)
         {
             _context = context;
             _userManager = userManager;
+            _configuration = configuration;
         }
 
+        private string CurrentUserId => User.FindFirstValue(ClaimTypes.NameIdentifier)
+            ?? throw new InvalidOperationException("Authenticated request is missing a user id claim.");
+
         [HttpPost]
+        [AllowAnonymous]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
             var user = await _userManager.FindByNameAsync(request.Username);
@@ -33,8 +44,34 @@ namespace ZEGU.WebApp.Areas.Mobile.Controllers
             var result = await _userManager.CheckPasswordAsync(user, request.Password);
             if (!result) return Unauthorized(new { message = "Invalid username or password" });
 
+            if (!user.IsActive) return Unauthorized(new { message = "Account is deactivated" });
+
+            var jwtKey = _configuration["Jwt:Key"]!;
+            var jwtIssuer = _configuration["Jwt:Issuer"] ?? "ZEGU.MRS";
+            var jwtAudience = _configuration["Jwt:Audience"] ?? "ZEGU.MRS.Mobile";
+
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id),
+                new Claim(ClaimTypes.Name, user.UserName ?? user.Email ?? user.Id),
+                new Claim(ClaimTypes.Role, user.Role.ToString())
+            };
+
+            var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
+            var credentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
+            var expires = DateTime.UtcNow.AddHours(12);
+
+            var token = new JwtSecurityToken(
+                issuer: jwtIssuer,
+                audience: jwtAudience,
+                claims: claims,
+                expires: expires,
+                signingCredentials: credentials);
+
             return Ok(new
             {
+                accessToken = new JwtSecurityTokenHandler().WriteToken(token),
+                expiresAt = expires,
                 user.Id,
                 user.UserName,
                 user.Email,
@@ -76,13 +113,13 @@ namespace ZEGU.WebApp.Areas.Mobile.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetMyRequests(string userId)
+        public async Task<IActionResult> GetMyRequests()
         {
             var requests = await _context.MaintenanceRequests
                 .Include(r => r.Category)
                 .Include(r => r.Location)
                 .Include(r => r.Location.Building)
-                .Where(r => r.UserId == userId && r.IsActive)
+                .Where(r => r.UserId == CurrentUserId && r.IsActive)
                 .OrderByDescending(r => r.CreatedAt)
                 .Select(r => new
                 {
@@ -114,6 +151,7 @@ namespace ZEGU.WebApp.Areas.Mobile.Controllers
                 .FirstOrDefaultAsync(r => r.Id == id && r.IsActive);
 
             if (request == null) return NotFound();
+            if (request.UserId != CurrentUserId) return Forbid(JwtBearerDefaults.AuthenticationScheme);
 
             return Ok(new
             {
@@ -138,7 +176,7 @@ namespace ZEGU.WebApp.Areas.Mobile.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateRequest([FromBody] MobileCreateRequestRequest request)
         {
-            var user = await _userManager.FindByIdAsync(request.UserId);
+            var user = await _userManager.FindByIdAsync(CurrentUserId);
             if (user == null) return Unauthorized();
 
             var requestNumber = $"MRS-{DateTime.UtcNow.Year}-TEMP";
@@ -200,7 +238,6 @@ namespace ZEGU.WebApp.Areas.Mobile.Controllers
 
     public class MobileCreateRequestRequest
     {
-        public string UserId { get; set; } = string.Empty;
         public int CategoryId { get; set; }
         public int LocationId { get; set; }
         public string Title { get; set; } = string.Empty;

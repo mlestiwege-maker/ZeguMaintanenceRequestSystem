@@ -29,8 +29,13 @@ namespace ZEGU.Infrastructure.Data
                 }
             }
 
-            var adminEmail = configuration["AdminSettings:Email"] ?? "admin@university.edu";
-            var adminPassword = configuration["AdminSettings:Password"] ?? "Admin123!";
+            var adminEmail = configuration["AdminSettings:Email"];
+            var adminPassword = configuration["AdminSettings:Password"];
+            if (string.IsNullOrWhiteSpace(adminEmail) || string.IsNullOrWhiteSpace(adminPassword))
+            {
+                throw new InvalidOperationException(
+                    "AdminSettings:Email and AdminSettings:Password must be configured (user-secrets in dev, AdminSettings__Email/AdminSettings__Password environment variables in production) before the admin account can be seeded.");
+            }
             var adminUser = await userManager.FindByEmailAsync(adminEmail);
             if (adminUser == null)
             {
