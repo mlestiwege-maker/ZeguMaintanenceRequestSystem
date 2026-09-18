@@ -1,0 +1,31 @@
+@{
+    ViewData["Title"] = "Recovery Code";
+    var returnUrl = ViewData["ReturnUrl"] as string;
+}
+
+<div class="auth-page">
+    <div class="auth-card fade-in">
+        <div class="card-header">
+            <i class="bi bi-shield-lock"></i>
+            <h3 class="mb-0">Recovery Code</h3>
+            <p class="mb-0 opacity-75">Enter one of your saved recovery codes</p>
+        </div>
+        <div class="card-body">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <form method="post" asp-action="LoginWithRecoveryCode">
+                <input type="hidden" name="returnUrl" value="@returnUrl" />
+                <div class="mb-3">
+                    <label class="form-label">Recovery Code</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-key"></i></span>
+                        <input type="text" name="recoveryCode" class="form-control" placeholder="Enter recovery code" required autofocus />
+                    </div>
+                    <small class="text-muted">Each recovery code can only be used once.</small>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-box-arrow-in-right"></i> Verify
+                </button>
+            </form>
+        </div>
+    </div>
+</div>

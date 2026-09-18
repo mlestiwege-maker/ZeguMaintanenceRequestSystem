@@ -1,0 +1,49 @@
+@model ZEGU.WebApp.ViewModels.Account.EnableAuthenticatorViewModel
+
+@{
+    ViewData["Title"] = "Set Up Authenticator";
+}
+
+<div class="page-header">
+    <div>
+        <h2><i class="bi bi-shield-plus"></i> Set Up Authenticator App</h2>
+        <p class="page-subtitle">Scan the QR code, then enter a code to confirm</p>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <ol>
+                    <li>Install an authenticator app (Google Authenticator, Microsoft Authenticator, Authy, etc.) on your phone.</li>
+                    <li>Scan the QR code below, or enter the key manually.</li>
+                    <li>Enter the 6-digit code the app shows you to confirm setup.</li>
+                </ol>
+
+                <div class="text-center my-4">
+                    <img src="data:image/png;base64,@Model.QrCodeImageBase64" alt="QR code" style="max-width: 220px;" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Manual entry key</label>
+                    <input type="text" class="form-control" value="@Model.SharedKey" readonly />
+                </div>
+
+                <form method="post" asp-action="EnableAuthenticator">
+                    @Html.AntiForgeryToken()
+                    <div class="mb-3">
+                        <label class="form-label">Verification Code</label>
+                        <input type="text" name="code" class="form-control" placeholder="123456" autocomplete="one-time-code" required autofocus />
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-lg"></i> Verify and Enable
+                    </button>
+                    <a asp-action="TwoFactorAuthentication" class="btn btn-secondary">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

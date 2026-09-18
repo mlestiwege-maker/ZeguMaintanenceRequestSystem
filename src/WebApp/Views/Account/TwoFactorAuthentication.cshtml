@@ -1,0 +1,59 @@
+@model ZEGU.WebApp.ViewModels.Account.TwoFactorAuthenticationViewModel
+
+@{
+    ViewData["Title"] = "Two-Factor Authentication";
+}
+
+<div class="page-header">
+    <div>
+        <h2><i class="bi bi-shield-lock"></i> Two-Factor Authentication</h2>
+        <p class="page-subtitle">Add an extra layer of security to your account</p>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                @if (Model.Is2faEnabled)
+                {
+                    <div class="alert alert-success">
+                        <i class="bi bi-check-circle"></i> Two-factor authentication is <strong>enabled</strong> on your account.
+                    </div>
+
+                    <p>You have <strong>@Model.RecoveryCodesLeft</strong> recovery codes left.</p>
+                    @if (Model.RecoveryCodesLeft <= 2)
+                    {
+                        <div class="alert alert-warning">
+                            You are running low on recovery codes. Generate new ones and store them somewhere safe.
+                        </div>
+                    }
+
+                    <form method="post" asp-action="GenerateRecoveryCodes" class="d-inline">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-outline-primary">
+                            <i class="bi bi-arrow-repeat"></i> Generate New Recovery Codes
+                        </button>
+                    </form>
+
+                    <form method="post" asp-action="Disable2fa" class="d-inline" onsubmit="return confirm('Disable two-factor authentication? You will need to set it up again to re-enable it.');">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-outline-danger">
+                            <i class="bi bi-shield-x"></i> Disable 2FA
+                        </button>
+                    </form>
+                }
+                else
+                {
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle"></i> Two-factor authentication is <strong>not enabled</strong>.
+                    </div>
+                    <p>Use an authenticator app (Google Authenticator, Microsoft Authenticator, Authy, etc.) to generate codes for signing in.</p>
+                    <a asp-action="EnableAuthenticator" class="btn btn-primary">
+                        <i class="bi bi-shield-plus"></i> Set Up Authenticator App
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+</div>
