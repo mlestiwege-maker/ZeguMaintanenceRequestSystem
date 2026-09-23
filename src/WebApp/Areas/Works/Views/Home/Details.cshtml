@@ -96,6 +96,21 @@
                         <p class="mb-0 mt-1">@comment.CommentText</p>
                     </div>
                 }
+                <form method="post" asp-action="AddComment" asp-route-requestId="@Model.Id" class="mt-3">
+                    <div class="input-group">
+                        <input type="text" name="commentText" class="form-control" placeholder="Reply to the requester..." required />
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-reply"></i> Reply
+                        </button>
+                    </div>
+                    <div class="form-check mt-2">
+                        <input type="checkbox" class="form-check-input" id="isInternal" name="isInternal" value="true" />
+                        <input type="hidden" name="isInternal" value="false" />
+                        <label class="form-check-label small text-muted" for="isInternal">
+                            Internal note only (not visible or emailed to the requester)
+                        </label>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

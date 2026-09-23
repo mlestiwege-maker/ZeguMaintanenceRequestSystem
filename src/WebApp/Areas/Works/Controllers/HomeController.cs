@@ -7,6 +7,7 @@ using ZEGU.Core.Enums;
 using ZEGU.Core.Entities.Identity;
 using ZEGU.Infrastructure.Data;
 using ZEGU.Infrastructure.Services;
+using ZEGU.WebApp.Services;
 using ZEGU.WebApp.ViewModels.Works;
 using System.Security.Claims;
 
@@ -20,13 +21,15 @@ namespace ZEGU.WebApp.Areas.Works.Controllers
         private readonly NotificationService _notificationService;
         private readonly SLAMonitoringService _slaMonitoringService;
         private readonly AuditService _auditService;
+        private readonly EmailService _emailService;
 
-        public HomeController(ApplicationDbContext context, NotificationService notificationService, SLAMonitoringService slaMonitoringService, AuditService auditService)
+        public HomeController(ApplicationDbContext context, NotificationService notificationService, SLAMonitoringService slaMonitoringService, AuditService auditService, EmailService emailService)
         {
             _context = context;
             _notificationService = notificationService;
             _slaMonitoringService = slaMonitoringService;
             _auditService = auditService;
+            _emailService = emailService;
         }
 
         public async Task<IActionResult> Index()
@@ -258,10 +261,13 @@ namespace ZEGU.WebApp.Areas.Works.Controllers
                 }
             }
 
-            await _notificationService.CreateNotificationAsync(request.UserId, 
-                "Request Assigned", 
-                $"Your request {request.RequestNumber} has been assigned to {technician.TechnicianType}", 
+            await _notificationService.CreateNotificationAsync(request.UserId,
+                "Request Assigned",
+                $"Your request {request.RequestNumber} has been assigned to {technician.TechnicianType}",
                 request.Id);
+
+            await SendRequesterStatusEmailAsync(request, "RequestAssigned",
+                $"A {technician.TechnicianType} has been assigned to your request {request.RequestNumber} and will be in touch soon.");
 
             TempData["SuccessMessage"] = "Technician assigned successfully!";
             return RedirectToAction(nameof(AllRequests));
@@ -373,6 +379,10 @@ namespace ZEGU.WebApp.Areas.Works.Controllers
                 $"Your request {request.RequestNumber} status has been changed to {newStatus}",
                 request.Id);
 
+            await SendRequesterStatusEmailAsync(request, "RequestStatusUpdated",
+                $"Your request {request.RequestNumber} status has been changed to <strong>{newStatus}</strong>." +
+                (string.IsNullOrEmpty(comments) ? "" : $"<br/>Notes: {comments}"));
+
             TempData["SuccessMessage"] = "Request status updated successfully!";
             return RedirectToAction(nameof(AllRequests));
         }
@@ -421,8 +431,11 @@ namespace ZEGU.WebApp.Areas.Works.Controllers
 
             await _notificationService.CreateNotificationAsync(request.UserId,
                 "Request Rejected",
-                $"Your request {request.RequestNumber} has been rejected. Reason: {rejectionReason}", 
+                $"Your request {request.RequestNumber} has been rejected. Reason: {rejectionReason}",
                 request.Id);
+
+            await SendRequesterStatusEmailAsync(request, "RequestRejected",
+                $"Your request {request.RequestNumber} has been rejected.<br/>Reason: {rejectionReason}");
 
             TempData["SuccessMessage"] = "Request rejected successfully!";
             return RedirectToAction(nameof(AllRequests));
@@ -437,13 +450,72 @@ namespace ZEGU.WebApp.Areas.Works.Controllers
                 .Include(r => r.Location.Building)
                 .Include(r => r.StatusHistory)
                 .Include(r => r.Comments)
+                .ThenInclude(c => c.User)
                 .Include(r => r.Attachments)
                 .Include(r => r.Assignments)
                 .ThenInclude(a => a.Technician)
                 .FirstOrDefaultAsync(r => r.Id == id && r.IsActive);
-            
+
             if (request == null) return NotFound();
             return View(request);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddComment(int requestId, string commentText, bool isInternal = false)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == User.Identity.Name);
+            if (user == null) return RedirectToAction("Login", "Account", new { area = "" });
+
+            var request = await _context.MaintenanceRequests
+                .Include(r => r.User)
+                .FirstOrDefaultAsync(r => r.Id == requestId && r.IsActive);
+            if (request == null) return NotFound();
+
+            _context.RequestComments.Add(new RequestComment
+            {
+                RequestId = requestId,
+                UserId = user.Id,
+                CommentText = commentText,
+                IsInternal = isInternal
+            });
+            await _context.SaveChangesAsync();
+
+            if (!isInternal)
+            {
+                await _notificationService.CreateNotificationAsync(request.UserId,
+                    "New Reply on Your Request",
+                    $"{user.FirstName} {user.LastName} replied to your request {request.RequestNumber}: {commentText}",
+                    request.Id);
+
+                if (!string.IsNullOrEmpty(request.User.Email))
+                {
+                    var template = await _notificationService.RenderTemplateAsync("RequestReplied", new Dictionary<string, string>
+                    {
+                        ["RequestNumber"] = request.RequestNumber,
+                        ["Title"] = request.Title,
+                        ["UserName"] = $"{request.User.FirstName} {request.User.LastName}",
+                        ["ReplyBy"] = $"{user.FirstName} {user.LastName}",
+                        ["ReplyText"] = commentText
+                    });
+
+                    if (template.HasValue)
+                    {
+                        _ = _emailService.SendEmailAsync(request.User.Email, template.Value.Subject, template.Value.Body, isHtml: true);
+                    }
+                    else
+                    {
+                        var subject = $"New reply on request {request.RequestNumber}";
+                        var body = $@"<p>Hi {request.User.FirstName},</p>
+                            <p><strong>{user.FirstName} {user.LastName}</strong> replied to your maintenance request <strong>{request.RequestNumber}</strong> ({request.Title}):</p>
+                            <blockquote style='border-left:3px solid #0d6efd;padding-left:12px;color:#333;'>{commentText}</blockquote>
+                            <p>Log in to the system to view the full conversation.</p>";
+                        _ = _emailService.SendEmailAsync(request.User.Email, subject, body, isHtml: true);
+                    }
+                }
+            }
+
+            TempData["SuccessMessage"] = "Reply added successfully";
+            return RedirectToAction(nameof(Details), new { id = requestId });
         }
 
         public async Task<IActionResult> SLADashboard()
@@ -511,6 +583,31 @@ namespace ZEGU.WebApp.Areas.Works.Controllers
 
             TempData["SuccessMessage"] = "Request priority updated successfully!";
             return RedirectToAction(nameof(AllRequests));
+        }
+
+        private async Task SendRequesterStatusEmailAsync(MaintenanceRequest request, string templateName, string fallbackHtmlMessage)
+        {
+            var requester = await _context.Users.FindAsync(request.UserId);
+            if (requester == null || string.IsNullOrEmpty(requester.Email)) return;
+
+            var template = await _notificationService.RenderTemplateAsync(templateName, new Dictionary<string, string>
+            {
+                ["RequestNumber"] = request.RequestNumber,
+                ["Title"] = request.Title,
+                ["UserName"] = $"{requester.FirstName} {requester.LastName}",
+                ["Status"] = request.Status.ToString()
+            });
+
+            if (template.HasValue)
+            {
+                _ = _emailService.SendEmailAsync(requester.Email, template.Value.Subject, template.Value.Body, isHtml: true);
+            }
+            else
+            {
+                var subject = $"Update on your request {request.RequestNumber}";
+                var body = $"<p>Hi {requester.FirstName},</p><p>{fallbackHtmlMessage}</p>";
+                _ = _emailService.SendEmailAsync(requester.Email, subject, body, isHtml: true);
+            }
         }
     }
 }

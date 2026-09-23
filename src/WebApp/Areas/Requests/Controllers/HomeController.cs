@@ -200,6 +200,37 @@ namespace ZEGU.WebApp.Areas.Requests.Controllers
                 }
             }
 
+            if (!string.IsNullOrEmpty(user.Email))
+            {
+                var confirmationTemplate = await _notificationService.RenderTemplateAsync("RequestSubmittedConfirmation", new Dictionary<string, string>
+                {
+                    ["RequestNumber"] = request.RequestNumber,
+                    ["Title"] = request.Title,
+                    ["UserName"] = $"{user.FirstName} {user.LastName}",
+                    ["Status"] = "Submitted",
+                    ["Priority"] = request.Priority.ToString(),
+                    ["Date"] = request.CreatedAt.ToString("dd MMM yyyy")
+                });
+
+                if (confirmationTemplate.HasValue)
+                {
+                    _ = _emailService.SendEmailAsync(user.Email, confirmationTemplate.Value.Subject, confirmationTemplate.Value.Body, isHtml: true);
+                }
+                else
+                {
+                    var subject = $"Request {request.RequestNumber} received";
+                    var body = $@"<p>Hi {user.FirstName},</p>
+                        <p>Your maintenance request has been successfully submitted and is now with our Works team.</p>
+                        <ul>
+                            <li><strong>Request #:</strong> {request.RequestNumber}</li>
+                            <li><strong>Title:</strong> {request.Title}</li>
+                            <li><strong>Priority:</strong> {request.Priority}</li>
+                        </ul>
+                        <p>We'll email you again as soon as there's an update or reply on this request.</p>";
+                    _ = _emailService.SendEmailAsync(user.Email, subject, body, isHtml: true);
+                }
+            }
+
             TempData["SuccessMessage"] = $"Maintenance request {request.RequestNumber} submitted successfully!";
             return RedirectToAction(nameof(MyRequests));
         }
@@ -262,6 +293,7 @@ namespace ZEGU.WebApp.Areas.Requests.Controllers
                 .Include(r => r.Location.Building)
                 .Include(r => r.StatusHistory)
                 .Include(r => r.Comments)
+                .ThenInclude(c => c.User)
                 .Include(r => r.Attachments)
                 .Include(r => r.Assignments)
                 .ThenInclude(a => a.Technician)
@@ -288,6 +320,41 @@ namespace ZEGU.WebApp.Areas.Requests.Controllers
                 IsInternal = false
             });
             await _context.SaveChangesAsync();
+
+            await _notificationService.CreateNotificationForRoleAsync(UserRole.WorksOfficer,
+                "New Reply from Requester",
+                $"{user.FirstName} {user.LastName} replied to request {request.RequestNumber}: {commentText}",
+                request.Id);
+
+            var worksUsers = await _context.Users
+                .Where(u => (u.Role == UserRole.WorksOfficer || u.Role == UserRole.Manager) && u.IsActive)
+                .ToListAsync();
+
+            var replyTemplate = await _notificationService.RenderTemplateAsync("RequestCommentReceived", new Dictionary<string, string>
+            {
+                ["RequestNumber"] = request.RequestNumber,
+                ["Title"] = request.Title,
+                ["UserName"] = $"{user.FirstName} {user.LastName}",
+                ["ReplyText"] = commentText
+            });
+
+            foreach (var worksUser in worksUsers)
+            {
+                if (string.IsNullOrEmpty(worksUser.Email)) continue;
+
+                if (replyTemplate.HasValue)
+                {
+                    _ = _emailService.SendEmailAsync(worksUser.Email, replyTemplate.Value.Subject, replyTemplate.Value.Body, isHtml: true);
+                }
+                else
+                {
+                    var subject = $"New reply from requester on {request.RequestNumber}";
+                    var body = $@"<p>Hi {worksUser.FirstName},</p>
+                        <p><strong>{user.FirstName} {user.LastName}</strong> replied on maintenance request <strong>{request.RequestNumber}</strong> ({request.Title}):</p>
+                        <blockquote style='border-left:3px solid #0d6efd;padding-left:12px;color:#333;'>{commentText}</blockquote>";
+                    _ = _emailService.SendEmailAsync(worksUser.Email, subject, body, isHtml: true);
+                }
+            }
 
             TempData["SuccessMessage"] = "Comment added successfully";
             return RedirectToAction(nameof(Details), new { id = requestId });
