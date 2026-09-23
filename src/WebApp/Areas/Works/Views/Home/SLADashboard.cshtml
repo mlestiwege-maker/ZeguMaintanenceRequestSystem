@@ -55,14 +55,14 @@
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-striped">
+                <table class="table table-striped table-mobile-cards">
                     <thead>
                         <tr>
                             <th>Request #</th>
                             <th>Title</th>
-                            <th>Category</th>
-                            <th>SLA (hrs)</th>
-                            <th>Submitted</th>
+                            <th class="hide-mobile">Category</th>
+                            <th class="hide-mobile">SLA (hrs)</th>
+                            <th class="hide-mobile">Submitted</th>
                             <th>Status</th>
                             <th>Actions</th>
                         </tr>
@@ -72,17 +72,17 @@
                         {
                             var slaDeadline = request.Category.SLAHours.HasValue ? request.CreatedAt.AddHours(request.Category.SLAHours.Value) : (DateTime?)null;
                             var hoursOverdue = slaDeadline.HasValue ? (DateTime.UtcNow - slaDeadline.Value).TotalHours : 0;
-                            
+
                             <tr>
-                                <td><strong>@request.RequestNumber</strong></td>
-                                <td>@request.Title</td>
-                                <td>@request.Category.CategoryName</td>
-                                <td>@request.Category.SLAHours</td>
-                                <td>@request.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
-                                <td>
+                                <td data-label="Request #"><strong>@request.RequestNumber</strong></td>
+                                <td data-label="Title" class="text-truncate-2">@request.Title</td>
+                                <td data-label="Category" class="hide-mobile">@request.Category.CategoryName</td>
+                                <td data-label="SLA (hrs)" class="hide-mobile">@request.Category.SLAHours</td>
+                                <td data-label="Submitted" class="hide-mobile">@request.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td data-label="Status">
                                     <span class="badge status-@request.Status.ToString().ToLower()">@request.Status</span>
                                 </td>
-                                <td class="table-actions">
+                                <td data-label="Actions" class="table-actions">
                                     <a asp-action="Details" asp-route-id="@request.Id" class="btn btn-sm btn-info" title="View">
                                         <i class="bi bi-eye"></i>
                                     </a>

@@ -17,13 +17,13 @@
 <div class="card">
     <div class="card-body">
         <div class="table-responsive">
-            <table class="table table-striped table-hover">
+            <table class="table table-striped table-hover table-mobile-cards">
                 <thead>
                     <tr>
                         <th>Department Name</th>
-                        <th>Code</th>
-                        <th>Head</th>
-                        <th>Contact</th>
+                        <th class="hide-mobile">Code</th>
+                        <th class="hide-mobile">Head</th>
+                        <th class="hide-mobile">Contact</th>
                         <th>Status</th>
                         <th>Actions</th>
                     </tr>
@@ -32,11 +32,11 @@
                     @foreach (var dept in Model)
                     {
                         <tr>
-                            <td><strong>@dept.DepartmentName</strong></td>
-                            <td>@dept.Code</td>
-                            <td>@dept.HeadOfDepartment</td>
-                            <td>@dept.ContactEmail</td>
-                            <td>
+                            <td data-label="Department Name"><strong>@dept.DepartmentName</strong></td>
+                            <td data-label="Code" class="hide-mobile">@dept.Code</td>
+                            <td data-label="Head" class="hide-mobile">@dept.HeadOfDepartment</td>
+                            <td data-label="Contact" class="hide-mobile">@dept.ContactEmail</td>
+                            <td data-label="Status">
                                 @if (dept.IsActive)
                                 {
                                     <span class="badge bg-success">Active</span>
@@ -46,7 +46,7 @@
                                     <span class="badge bg-danger">Inactive</span>
                                 }
                             </td>
-                            <td class="table-actions">
+                            <td data-label="Actions" class="table-actions">
                                 <a asp-action="Edit" asp-route-id="@dept.Id" class="btn btn-sm btn-info" title="Edit">
                                     <i class="bi bi-pencil"></i>
                                 </a>

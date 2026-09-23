@@ -1162,6 +1162,13 @@ footer a:hover {
     .hide-mobile {
         display: none !important;
     }
+
+    /* Stat card grids: force 2-per-row regardless of the col-md-N used,
+       instead of each stacking full-width */
+    .row > [class*="col-md-"]:has(> .stat-card) {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
 }
 
 /* ============ RESPONSIVE: SMALL MOBILE (≤ 575px) ============ */

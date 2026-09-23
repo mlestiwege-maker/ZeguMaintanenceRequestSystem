@@ -79,7 +79,7 @@
                 @if (Model.Records != null && Model.Records.Any())
                 {
                     <div class="table-responsive">
-                        <table class="table">
+                        <table class="table table-mobile-cards">
                             <thead>
                                 <tr>
                                     <th>Date</th>
@@ -92,10 +92,10 @@
                                 @foreach (var record in Model.Records.OrderByDescending(r => r.PerformedAt))
                                 {
                                     <tr>
-                                        <td>@record.PerformedAt.ToString("dd MMM yyyy")</td>
-                                        <td>@(record.PerformedBy?.FirstName + " " + record.PerformedBy?.LastName ?? "N/A")</td>
-                                        <td>@record.WorkPerformed</td>
-                                        <td>@record.Notes</td>
+                                        <td data-label="Date">@record.PerformedAt.ToString("dd MMM yyyy")</td>
+                                        <td data-label="Performed By">@(record.PerformedBy?.FirstName + " " + record.PerformedBy?.LastName ?? "N/A")</td>
+                                        <td data-label="Work Done">@record.WorkPerformed</td>
+                                        <td data-label="Notes">@record.Notes</td>
                                     </tr>
                                 }
                             </tbody>

@@ -17,12 +17,12 @@
 <div class="card">
     <div class="card-body">
         <div class="table-responsive">
-            <table class="table table-striped table-hover">
+            <table class="table table-striped table-hover table-mobile-cards">
                 <thead>
                     <tr>
                         <th>Campus Name</th>
-                        <th>Code</th>
-                        <th>Address</th>
+                        <th class="hide-mobile">Code</th>
+                        <th class="hide-mobile">Address</th>
                         <th>Status</th>
                         <th>Actions</th>
                     </tr>
@@ -31,10 +31,10 @@
                     @foreach (var campus in Model)
                     {
                         <tr>
-                            <td><strong>@campus.CampusName</strong></td>
-                            <td>@campus.Code</td>
-                            <td>@campus.Address</td>
-                            <td>
+                            <td data-label="Campus Name"><strong>@campus.CampusName</strong></td>
+                            <td data-label="Code" class="hide-mobile">@campus.Code</td>
+                            <td data-label="Address" class="hide-mobile">@campus.Address</td>
+                            <td data-label="Status">
                                 @if (campus.IsActive)
                                 {
                                     <span class="badge bg-success">Active</span>
@@ -44,7 +44,7 @@
                                     <span class="badge bg-danger">Inactive</span>
                                 }
                             </td>
-                            <td class="table-actions">
+                            <td data-label="Actions" class="table-actions">
                                 <a asp-action="Edit" asp-route-id="@campus.Id" class="btn btn-sm btn-info" title="Edit">
                                     <i class="bi bi-pencil"></i>
                                 </a>

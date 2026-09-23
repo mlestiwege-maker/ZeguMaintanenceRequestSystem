@@ -18,16 +18,16 @@
         @if (Model.Any())
         {
             <div class="table-responsive">
-                <table class="table table-striped table-hover">
+                <table class="table table-striped table-hover table-mobile-cards">
                     <thead>
                         <tr>
                             <th>Schedule</th>
-                            <th>Category</th>
-                            <th>Location</th>
-                            <th>Frequency</th>
+                            <th class="hide-mobile">Category</th>
+                            <th class="hide-mobile">Location</th>
+                            <th class="hide-mobile">Frequency</th>
                             <th>Next Due</th>
                             <th>Status</th>
-                            <th>Assigned</th>
+                            <th class="hide-mobile">Assigned</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -37,17 +37,17 @@
                             var isOverdue = schedule.NextDue < DateTime.UtcNow;
                             var isDueSoon = schedule.NextDue < DateTime.UtcNow.AddDays(7);
                             <tr class="@(isOverdue ? "table-danger" : (isDueSoon ? "table-warning" : ""))">
-                                <td>
+                                <td data-label="Schedule">
                                     <strong>@schedule.ScheduleName</strong>
                                     @if (!string.IsNullOrEmpty(schedule.Description))
                                     {
                                         <br /><small class="text-muted">@schedule.Description</small>
                                     }
                                 </td>
-                                <td>@schedule.Category?.CategoryName</td>
-                                <td>@schedule.Location?.RoomNumber (@schedule.Location?.Building?.BuildingName)</td>
-                                <td><span class="badge bg-info">@schedule.Frequency</span></td>
-                                <td>
+                                <td data-label="Category" class="hide-mobile">@schedule.Category?.CategoryName</td>
+                                <td data-label="Location" class="hide-mobile">@schedule.Location?.RoomNumber (@schedule.Location?.Building?.BuildingName)</td>
+                                <td data-label="Frequency" class="hide-mobile"><span class="badge bg-info">@schedule.Frequency</span></td>
+                                <td data-label="Next Due">
                                     <strong>@schedule.NextDue.ToString("dd MMM yyyy")</strong>
                                     @if (isOverdue)
                                     {
@@ -58,7 +58,7 @@
                                         <br /><span class="badge bg-warning text-dark">Due Soon</span>
                                     }
                                 </td>
-                                <td>
+                                <td data-label="Status">
                                     @if (schedule.IsActive)
                                     {
                                         <span class="badge bg-success">Active</span>
@@ -68,8 +68,8 @@
                                         <span class="badge bg-secondary">Inactive</span>
                                     }
                                 </td>
-                                <td>@(schedule.Technician?.User?.FirstName + " " + schedule.Technician?.User?.LastName ?? "Unassigned")</td>
-                                <td>
+                                <td data-label="Assigned" class="hide-mobile">@(schedule.Technician?.User?.FirstName + " " + schedule.Technician?.User?.LastName ?? "Unassigned")</td>
+                                <td data-label="Actions">
                                     <div class="table-actions">
                                         <a asp-action="Details" asp-route-id="@schedule.Id" class="btn btn-sm btn-info" title="View">
                                             <i class="bi bi-eye"></i>

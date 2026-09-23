@@ -15,27 +15,27 @@
         @if (Model.Items.Any())
         {
             <div class="table-responsive">
-                <table class="table table-striped table-hover">
+                <table class="table table-striped table-hover table-mobile-cards">
                     <thead>
                         <tr>
                             <th>Date/Time</th>
                             <th>User</th>
                             <th>Action</th>
-                            <th>Entity Type</th>
-                            <th>Entity ID</th>
-                            <th>IP Address</th>
+                            <th class="hide-mobile">Entity Type</th>
+                            <th class="hide-mobile">Entity ID</th>
+                            <th class="hide-mobile">IP Address</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach (var log in Model.Items)
                         {
                             <tr>
-                                <td>@log.CreatedAt.ToString("dd MMM yyyy HH:mm:ss")</td>
-                                <td>@(log.UserName ?? "System")</td>
-                                <td><span class="badge bg-info">@log.Action</span></td>
-                                <td>@log.EntityType</td>
-                                <td>@log.EntityId</td>
-                                <td>@log.IpAddress</td>
+                                <td data-label="Date/Time">@log.CreatedAt.ToString("dd MMM yyyy HH:mm:ss")</td>
+                                <td data-label="User">@(log.UserName ?? "System")</td>
+                                <td data-label="Action"><span class="badge bg-info">@log.Action</span></td>
+                                <td data-label="Entity Type" class="hide-mobile">@log.EntityType</td>
+                                <td data-label="Entity ID" class="hide-mobile">@log.EntityId</td>
+                                <td data-label="IP Address" class="hide-mobile">@log.IpAddress</td>
                             </tr>
                         }
                     </tbody>

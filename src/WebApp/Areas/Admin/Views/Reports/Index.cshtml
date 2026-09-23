@@ -93,7 +93,7 @@
                 @if (Model.MonthlyTrends.Any())
                 {
                     <div class="table-responsive">
-                        <table class="table table-sm">
+                        <table class="table table-sm table-mobile-cards">
                             <thead>
                                 <tr>
                                     <th>Month</th>
@@ -106,10 +106,10 @@
                                 @foreach (var month in Model.MonthlyTrends)
                                 {
                                     <tr>
-                                        <td>@month.Month</td>
-                                        <td>@month.RequestCount</td>
-                                        <td>@month.CompletedCount</td>
-                                        <td>@month.TotalCost?.ToString("C")</td>
+                                        <td data-label="Month">@month.Month</td>
+                                        <td data-label="Requests">@month.RequestCount</td>
+                                        <td data-label="Completed">@month.CompletedCount</td>
+                                        <td data-label="Cost">@month.TotalCost?.ToString("C")</td>
                                     </tr>
                                 }
                             </tbody>
@@ -245,15 +245,15 @@
                 @if (Model.TechnicianPerformance.Any(t => t.TotalAssignments > 0))
                 {
                     <div class="table-responsive">
-                        <table class="table table-striped table-hover">
+                        <table class="table table-striped table-hover table-mobile-cards">
                             <thead>
                                 <tr>
                                     <th>Technician</th>
-                                    <th>Type</th>
+                                    <th class="hide-mobile">Type</th>
                                     <th>Assignments</th>
-                                    <th>Work Logs</th>
-                                    <th>Total Hours</th>
-                                    <th>Labor Cost</th>
+                                    <th class="hide-mobile">Work Logs</th>
+                                    <th class="hide-mobile">Total Hours</th>
+                                    <th class="hide-mobile">Labor Cost</th>
                                     <th>Completed</th>
                                 </tr>
                             </thead>
@@ -261,13 +261,13 @@
                                 @foreach (var tech in Model.TechnicianPerformance.Where(t => t.TotalAssignments > 0).OrderByDescending(t => t.CompletedRequests))
                                 {
                                     <tr>
-                                        <td><strong>@tech.TechnicianName</strong></td>
-                                        <td>@tech.TechnicianType</td>
-                                        <td><span class="badge bg-primary">@tech.TotalAssignments</span></td>
-                                        <td><span class="badge bg-info">@tech.TotalWorkLogs</span></td>
-                                        <td>@(tech.TotalHours.HasValue ? tech.TotalHours.Value.ToString("F1") : "0")</td>
-                                        <td>@tech.TotalLaborCost?.ToString("C")</td>
-                                        <td><span class="badge bg-success">@tech.CompletedRequests</span></td>
+                                        <td data-label="Technician"><strong>@tech.TechnicianName</strong></td>
+                                        <td data-label="Type" class="hide-mobile">@tech.TechnicianType</td>
+                                        <td data-label="Assignments"><span class="badge bg-primary">@tech.TotalAssignments</span></td>
+                                        <td data-label="Work Logs" class="hide-mobile"><span class="badge bg-info">@tech.TotalWorkLogs</span></td>
+                                        <td data-label="Total Hours" class="hide-mobile">@(tech.TotalHours.HasValue ? tech.TotalHours.Value.ToString("F1") : "0")</td>
+                                        <td data-label="Labor Cost" class="hide-mobile">@tech.TotalLaborCost?.ToString("C")</td>
+                                        <td data-label="Completed"><span class="badge bg-success">@tech.CompletedRequests</span></td>
                                     </tr>
                                 }
                             </tbody>

@@ -57,21 +57,21 @@
             </div>
             <div class="card-body">
                 <p class="text-muted small">SLA hours are enforced per maintenance category. Edit a category to change its SLA target.</p>
-                <table class="table table-sm">
+                <table class="table table-sm table-mobile-cards">
                     <thead>
                         <tr>
                             <th>Category</th>
                             <th>SLA (hours)</th>
-                            <th></th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach (var cat in Model.CategorySlaHours)
                         {
                             <tr>
-                                <td>@cat.CategoryName</td>
-                                <td>@cat.SLAHours</td>
-                                <td>
+                                <td data-label="Category">@cat.CategoryName</td>
+                                <td data-label="SLA (hours)">@cat.SLAHours</td>
+                                <td data-label="Action">
                                     <a asp-controller="Categories" asp-action="Edit" asp-route-id="@cat.Id" class="btn btn-sm btn-outline-primary">
                                         <i class="bi bi-pencil"></i> Edit
                                     </a>

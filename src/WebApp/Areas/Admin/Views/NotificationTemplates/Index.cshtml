@@ -18,13 +18,13 @@
         @if (Model.Any())
         {
             <div class="table-responsive">
-                <table class="table table-striped table-hover">
+                <table class="table table-striped table-hover table-mobile-cards">
                     <thead>
                         <tr>
                             <th>Name</th>
                             <th>Type</th>
-                            <th>Subject</th>
-                            <th>Placeholders</th>
+                            <th class="hide-mobile">Subject</th>
+                            <th class="hide-mobile">Placeholders</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -32,12 +32,12 @@
                         @foreach (var template in Model)
                         {
                             <tr>
-                                <td><strong>@template.Name</strong></td>
-                                <td>
+                                <td data-label="Name"><strong>@template.Name</strong></td>
+                                <td data-label="Type">
                                     <span class="badge bg-info">@template.Type</span>
                                 </td>
-                                <td>@template.Subject</td>
-                                <td>
+                                <td data-label="Subject" class="hide-mobile">@template.Subject</td>
+                                <td data-label="Placeholders" class="hide-mobile">
                                     @foreach (var placeholder in template.Placeholders.Take(5))
                                     {
                                         <span class="badge bg-secondary me-1">@placeholder</span>
@@ -47,7 +47,7 @@
                                         <span class="text-muted">+@(template.Placeholders.Count - 5) more</span>
                                     }
                                 </td>
-                                <td>
+                                <td data-label="Actions">
                                     <div class="table-actions">
                                         <a asp-action="Edit" asp-route-id="@template.Id" class="btn btn-sm btn-primary" title="Edit">
                                             <i class="bi bi-pencil"></i>

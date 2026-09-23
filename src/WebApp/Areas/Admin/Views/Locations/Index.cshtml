@@ -17,13 +17,13 @@
 <div class="card">
     <div class="card-body">
         <div class="table-responsive">
-            <table class="table table-striped table-hover">
+            <table class="table table-striped table-hover table-mobile-cards">
                 <thead>
                     <tr>
                         <th>Building</th>
-                        <th>Code</th>
-                        <th>Campus</th>
-                        <th>Floors</th>
+                        <th class="hide-mobile">Code</th>
+                        <th class="hide-mobile">Campus</th>
+                        <th class="hide-mobile">Floors</th>
                         <th>Rooms</th>
                         <th>Status</th>
                         <th>Actions</th>
@@ -33,12 +33,12 @@
                     @foreach (var building in Model)
                     {
                         <tr>
-                            <td><strong>@building.BuildingName</strong></td>
-                            <td>@building.Code</td>
-                            <td>@building.Campus?.CampusName</td>
-                            <td>@building.Floors</td>
-                            <td>@building.Rooms.Count</td>
-                            <td>
+                            <td data-label="Building"><strong>@building.BuildingName</strong></td>
+                            <td data-label="Code" class="hide-mobile">@building.Code</td>
+                            <td data-label="Campus" class="hide-mobile">@building.Campus?.CampusName</td>
+                            <td data-label="Floors" class="hide-mobile">@building.Floors</td>
+                            <td data-label="Rooms">@building.Rooms.Count</td>
+                            <td data-label="Status">
                                 @if (building.IsActive)
                                 {
                                     <span class="badge bg-success">Active</span>
@@ -48,7 +48,7 @@
                                     <span class="badge bg-danger">Inactive</span>
                                 }
                             </td>
-                            <td class="table-actions">
+                            <td data-label="Actions" class="table-actions">
                                 <a asp-action="Edit" asp-route-id="@building.Id" class="btn btn-sm btn-info" title="Edit">
                                     <i class="bi bi-pencil"></i>
                                 </a>

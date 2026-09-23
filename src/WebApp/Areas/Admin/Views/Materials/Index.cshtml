@@ -17,15 +17,15 @@
 <div class="card">
     <div class="card-body">
         <div class="table-responsive">
-            <table class="table table-striped table-hover">
+            <table class="table table-striped table-hover table-mobile-cards">
                 <thead>
                     <tr>
                         <th>Material Name</th>
-                        <th>Category</th>
-                        <th>Unit</th>
-                        <th>Unit Cost</th>
+                        <th class="hide-mobile">Category</th>
+                        <th class="hide-mobile">Unit</th>
+                        <th class="hide-mobile">Unit Cost</th>
                         <th>Stock</th>
-                        <th>Min Stock</th>
+                        <th class="hide-mobile">Min Stock</th>
                         <th>Status</th>
                         <th>Actions</th>
                     </tr>
@@ -34,19 +34,19 @@
                     @foreach (var material in Model)
                     {
                         <tr class="@(material.CurrentStock <= material.MinimumStock ? "table-warning" : "")">
-                            <td><strong>@material.MaterialName</strong></td>
-                            <td>@material.Category</td>
-                            <td>@material.Unit</td>
-                            <td>@material.UnitCost?.ToString("C")</td>
-                            <td>
+                            <td data-label="Material Name"><strong>@material.MaterialName</strong></td>
+                            <td data-label="Category" class="hide-mobile">@material.Category</td>
+                            <td data-label="Unit" class="hide-mobile">@material.Unit</td>
+                            <td data-label="Unit Cost" class="hide-mobile">@material.UnitCost?.ToString("C")</td>
+                            <td data-label="Stock">
                                 @material.CurrentStock
                                 @if (material.CurrentStock <= material.MinimumStock)
                                 {
                                     <span class="badge bg-danger ms-1">Low</span>
                                 }
                             </td>
-                            <td>@material.MinimumStock</td>
-                            <td>
+                            <td data-label="Min Stock" class="hide-mobile">@material.MinimumStock</td>
+                            <td data-label="Status">
                                 @if (material.IsActive)
                                 {
                                     <span class="badge bg-success">Active</span>
@@ -56,7 +56,7 @@
                                     <span class="badge bg-danger">Inactive</span>
                                 }
                             </td>
-                            <td class="table-actions">
+                            <td data-label="Actions" class="table-actions">
                                 <a asp-action="AdjustStock" asp-route-id="@material.Id" class="btn btn-sm btn-info" title="Adjust Stock">
                                     <i class="bi bi-box-seam"></i>
                                 </a>

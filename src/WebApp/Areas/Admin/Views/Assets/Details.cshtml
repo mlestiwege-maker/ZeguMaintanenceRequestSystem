@@ -94,7 +94,7 @@
                 @if (Model.MaintenanceRequests != null && Model.MaintenanceRequests.Any())
                 {
                     <div class="table-responsive">
-                        <table class="table">
+                        <table class="table table-mobile-cards">
                             <thead>
                                 <tr>
                                     <th>Request #</th>
@@ -108,13 +108,13 @@
                                 @foreach (var request in Model.MaintenanceRequests.OrderByDescending(r => r.CreatedAt))
                                 {
                                     <tr>
-                                        <td>@request.RequestNumber</td>
-                                        <td>@request.Title</td>
-                                        <td>
+                                        <td data-label="Request #">@request.RequestNumber</td>
+                                        <td data-label="Title">@request.Title</td>
+                                        <td data-label="Status">
                                             <span class="badge status-@request.Status.ToString().ToLower()">@request.Status</span>
                                         </td>
-                                        <td>@request.CreatedAt.ToString("dd MMM yyyy")</td>
-                                        <td>
+                                        <td data-label="Date">@request.CreatedAt.ToString("dd MMM yyyy")</td>
+                                        <td data-label="Action">
                                             <a asp-area="Works" asp-controller="Home" asp-action="Details" asp-route-id="@request.Id" class="btn btn-sm btn-outline-info">
                                                 <i class="bi bi-eye"></i>
                                             </a>

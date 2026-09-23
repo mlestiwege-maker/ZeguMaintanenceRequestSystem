@@ -46,16 +46,16 @@
     <div class="card">
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-striped table-hover">
+                <table class="table table-striped table-hover table-mobile-cards">
                     <thead>
                         <tr>
                             <th>Request #</th>
                             <th>Title</th>
-                            <th>Category</th>
-                            <th>Location</th>
+                            <th class="hide-mobile">Category</th>
+                            <th class="hide-mobile">Location</th>
                             <th>Priority</th>
                             <th>Status</th>
-                            <th>Submitted</th>
+                            <th class="hide-mobile">Submitted</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -63,18 +63,18 @@
                         @foreach (var request in Model.Items)
                         {
                             <tr>
-                                <td><strong>@request.RequestNumber</strong></td>
-                                <td>@request.Title</td>
-                                <td>@request.Category.CategoryName</td>
-                                <td>@request.Location.Building.BuildingName - @request.Location.RoomNumber</td>
-                                <td>
+                                <td data-label="Request #"><strong>@request.RequestNumber</strong></td>
+                                <td data-label="Title" class="text-truncate-2">@request.Title</td>
+                                <td data-label="Category" class="hide-mobile">@request.Category.CategoryName</td>
+                                <td data-label="Location" class="hide-mobile">@request.Location.Building.BuildingName - @request.Location.RoomNumber</td>
+                                <td data-label="Priority">
                                     <span class="badge priority-@request.Priority.ToString().ToLower()">@request.Priority</span>
                                 </td>
-                                <td>
+                                <td data-label="Status">
                                     <span class="badge status-@request.Status.ToString().ToLower()">@request.Status</span>
                                 </td>
-                                <td>@request.CreatedAt.ToString("dd/MM/yyyy")</td>
-                                <td class="table-actions">
+                                <td data-label="Submitted" class="hide-mobile">@request.CreatedAt.ToString("dd/MM/yyyy")</td>
+                                <td data-label="Actions" class="table-actions">
                                     <a asp-action="Details" asp-route-id="@request.Id" class="btn btn-sm btn-info" title="View Details">
                                         <i class="bi bi-eye"></i>
                                     </a>
