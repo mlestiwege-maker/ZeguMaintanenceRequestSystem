@@ -33,7 +33,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
     options.Password.RequireLowercase = true;
     options.Password.RequireUppercase = true;
     options.Password.RequireNonAlphanumeric = true;
-    options.Password.RequiredLength = 10;
+    options.Password.RequiredLength = 8;
     options.Password.RequiredUniqueChars = 4;
 
     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
