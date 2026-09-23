@@ -29,7 +29,7 @@ namespace ZEGU.WebApp.Areas.Works.Controllers
         {
             var workLogs = await _context.WorkLogs
                 .Include(w => w.Technician)
-                .Include(w => w.Technician.User)
+                .Include(w => w.Technician!.User)
                 .Where(w => w.RequestId == requestId && w.IsActive)
                 .OrderByDescending(w => w.CreatedAt)
                 .ToListAsync();

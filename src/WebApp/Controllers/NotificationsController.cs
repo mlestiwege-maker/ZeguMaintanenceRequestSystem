@@ -81,7 +81,7 @@ namespace ZEGU.WebApp.Controllers
         [HttpGet]
         public async Task<IActionResult> GetUnread()
         {
-            var user = await _userManager.FindByNameAsync(User.Identity.Name);
+            var user = await _userManager.FindByNameAsync(User.Identity?.Name!);
             if (user == null) return Json(new List<object>());
 
             var notifications = await _notificationService.GetUnreadNotificationsAsync(user.Id);

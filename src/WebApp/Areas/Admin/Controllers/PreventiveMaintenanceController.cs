@@ -26,7 +26,7 @@ namespace ZEGU.WebApp.Areas.Admin.Controllers
                 .Include(s => s.Location)
                 .Include(s => s.Location.Building)
                 .Include(s => s.Technician)
-                .ThenInclude(t => t.User)
+                .ThenInclude(t => t!.User)
                 .OrderBy(s => s.NextDue)
                 .ToListAsync();
 
@@ -40,7 +40,7 @@ namespace ZEGU.WebApp.Areas.Admin.Controllers
                 .Include(s => s.Location)
                 .ThenInclude(l => l.Building)
                 .Include(s => s.Technician)
-                .ThenInclude(t => t.User)
+                .ThenInclude(t => t!.User)
                 .Include(s => s.Records)
                 .ThenInclude(r => r.PerformedBy)
                 .FirstOrDefaultAsync(s => s.Id == id);

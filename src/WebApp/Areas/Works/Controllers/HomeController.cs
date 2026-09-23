@@ -221,7 +221,8 @@ namespace ZEGU.WebApp.Areas.Works.Controllers
             var technician = await _context.Technicians.FindAsync(technicianId);
             if (technician == null) return NotFound();
 
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == User.Identity.Name);
+            var currentUserName = User.Identity?.Name;
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == currentUserName);
             if (user == null) return RedirectToAction("Login", "Account", new { area = "" });
 
             request.Status = MaintenanceRequestStatus.Assigned;
@@ -295,7 +296,8 @@ namespace ZEGU.WebApp.Areas.Works.Controllers
             var request = await _context.MaintenanceRequests.FindAsync(id);
             if (request == null) return NotFound();
 
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == User.Identity.Name);
+            var currentUserName = User.Identity?.Name;
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == currentUserName);
             if (user == null) return RedirectToAction("Login", "Account", new { area = "" });
 
             var oldStatus = request.Status;
@@ -407,7 +409,8 @@ namespace ZEGU.WebApp.Areas.Works.Controllers
             var request = await _context.MaintenanceRequests.FindAsync(id);
             if (request == null) return NotFound();
 
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == User.Identity.Name);
+            var currentUserName = User.Identity?.Name;
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == currentUserName);
             if (user == null) return RedirectToAction("Login", "Account", new { area = "" });
 
             request.Status = MaintenanceRequestStatus.Rejected;
@@ -463,7 +466,8 @@ namespace ZEGU.WebApp.Areas.Works.Controllers
         [HttpPost]
         public async Task<IActionResult> AddComment(int requestId, string commentText, bool isInternal = false)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == User.Identity.Name);
+            var currentUserName = User.Identity?.Name;
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == currentUserName);
             if (user == null) return RedirectToAction("Login", "Account", new { area = "" });
 
             var request = await _context.MaintenanceRequests
@@ -554,7 +558,8 @@ namespace ZEGU.WebApp.Areas.Works.Controllers
             var request = await _context.MaintenanceRequests.FindAsync(id);
             if (request == null) return NotFound();
 
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == User.Identity.Name);
+            var currentUserName = User.Identity?.Name;
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == currentUserName);
             if (user == null) return RedirectToAction("Login", "Account", new { area = "" });
 
             var oldPriority = request.Priority;

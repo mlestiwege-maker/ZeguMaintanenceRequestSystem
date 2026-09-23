@@ -33,7 +33,7 @@ namespace ZEGU.WebApp.Areas.Works.Controllers
             var workloadItems = technicians.Select(t => new TechnicianWorkloadItem
             {
                 TechnicianId = t.Id,
-                TechnicianName = $"{t.User.FirstName} {t.User.LastName}",
+                TechnicianName = t.User != null ? $"{t.User.FirstName} {t.User.LastName}" : "Unassigned",
                 TechnicianType = t.TechnicianType.ToString(),
                 IsAvailable = t.IsAvailable,
                 ActiveAssignments = t.Assignments.Count(a => a.IsActive && 
@@ -52,7 +52,7 @@ namespace ZEGU.WebApp.Areas.Works.Controllers
                     .Sum(w => (w.HoursSpent ?? 0) * (w.LaborRate ?? 0)),
                 AvgCompletionDays = t.Assignments
                     .Where(a => a.IsActive && a.Request.CompletedAt.HasValue)
-                    .Select(a => (a.Request.CompletedAt.Value - a.Request.CreatedAt).TotalDays)
+                    .Select(a => (a.Request.CompletedAt!.Value - a.Request.CreatedAt).TotalDays)
                     .DefaultIfEmpty()
                     .Average(),
                 CurrentRequests = t.Assignments

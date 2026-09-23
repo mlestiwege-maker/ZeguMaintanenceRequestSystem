@@ -102,7 +102,7 @@
                                     <td data-label="Request #">@request.RequestNumber</td>
                                     <td data-label="Requester">@request.User.FirstName @request.User.LastName</td>
                                     <td data-label="Category" class="hide-mobile">@request.Category.CategoryName</td>
-                                    <td data-label="Location" class="hide-mobile">@request.Location.Building.BuildingName - @request.Location.RoomNumber</td>
+                                    <td data-label="Location" class="hide-mobile">@request.Location.Building!.BuildingName - @request.Location.RoomNumber</td>
                                     <td data-label="Priority">
                                         <span class="badge priority-@request.Priority.ToString().ToLower()">@request.Priority</span>
                                     </td>

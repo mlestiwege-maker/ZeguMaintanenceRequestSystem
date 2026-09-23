@@ -21,7 +21,7 @@
     <meta name="application-name" content="ZEGU MRS" />
 </head>
 <body>
-    @if (User.Identity.IsAuthenticated)
+    @if (User.Identity?.IsAuthenticated == true)
     {
         <div class="app-wrapper">
             <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
@@ -120,7 +120,7 @@
                         <div class="dropdown">
                             <a class="nav-link text-dark d-flex align-items-center gap-2 p-2" href="#" role="button" data-bs-toggle="dropdown" aria-label="User menu">
                                 <i class="bi bi-person-circle fs-5"></i>
-                                <span class="d-none d-md-inline">@User.Identity.Name</span>
+                                <span class="d-none d-md-inline">@User.Identity?.Name</span>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end">
                                 <li><a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="Profile"><i class="bi bi-person me-2"></i>Profile</a></li>
@@ -140,7 +140,7 @@
                 <nav aria-label="breadcrumb" class="breadcrumb-wrapper d-none d-md-block">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a asp-area="" asp-controller="Home" asp-action="Index">Home</a></li>
-                        @if (ViewContext.RouteData.Values["area"] != null && ViewContext.RouteData.Values["area"].ToString() != "")
+                        @if (!string.IsNullOrEmpty(ViewContext.RouteData.Values["area"]?.ToString()))
                         {
                             <li class="breadcrumb-item"><a asp-area="@ViewContext.RouteData.Values["area"]" asp-controller="Home" asp-action="Index">@ViewContext.RouteData.Values["area"]</a></li>
                         }
@@ -225,7 +225,7 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
-    @if (User.Identity.IsAuthenticated)
+    @if (User.Identity?.IsAuthenticated == true)
     {
         <script>
             // Mobile sidebar toggle

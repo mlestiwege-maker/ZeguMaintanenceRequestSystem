@@ -335,7 +335,7 @@ namespace ZEGU.WebApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteAccountConfirmed(string password)
         {
-            var user = await _userManager.FindByNameAsync(User.Identity.Name);
+            var user = await _userManager.FindByNameAsync(User.Identity?.Name!);
             if (user == null) return RedirectToAction("Login", "Account", new { area = "" });
 
             var passwordValid = await _userManager.CheckPasswordAsync(user, password);
@@ -430,7 +430,7 @@ namespace ZEGU.WebApp.Controllers
             await _userManager.SetTwoFactorEnabledAsync(user, true);
             var recoveryCodes = await _userManager.GenerateNewTwoFactorRecoveryCodesAsync(user, 10);
 
-            return View("ShowRecoveryCodes", recoveryCodes.ToArray());
+            return View("ShowRecoveryCodes", (recoveryCodes ?? Enumerable.Empty<string>()).ToArray());
         }
 
         [HttpPost]
@@ -464,7 +464,7 @@ namespace ZEGU.WebApp.Controllers
             }
 
             var recoveryCodes = await _userManager.GenerateNewTwoFactorRecoveryCodesAsync(user, 10);
-            return View("ShowRecoveryCodes", recoveryCodes.ToArray());
+            return View("ShowRecoveryCodes", (recoveryCodes ?? Enumerable.Empty<string>()).ToArray());
         }
 
         private EnableAuthenticatorViewModel BuildEnableAuthenticatorViewModel(ApplicationUser user, string unformattedKey)

@@ -23,7 +23,7 @@
                     <div class="mb-3">
                         <label class="form-label">Campus</label>
                         <select name="campusId" class="form-select" required>
-                            @foreach (var campus in ViewBag.Campuses as List<ZEGU.Core.Entities.Shared.Campus>)
+                            @foreach (var campus in (ViewBag.Campuses as List<ZEGU.Core.Entities.Shared.Campus>) ?? new())
                             {
                                 <option value="@campus.Id" selected="@(Model.CampusId == campus.Id ? "selected" : null)">@campus.CampusName</option>
                             }

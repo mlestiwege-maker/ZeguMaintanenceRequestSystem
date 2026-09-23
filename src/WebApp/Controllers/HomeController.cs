@@ -19,9 +19,10 @@ namespace ZEGU.WebApp.Controllers
 
         public async Task<IActionResult> Index()
         {
-            if (User.Identity.IsAuthenticated)
+            if (User.Identity?.IsAuthenticated == true)
             {
-                var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == User.Identity.Name);
+                var currentUserName = User.Identity?.Name;
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == currentUserName);
                 if (user != null)
                 {
                     if (user.Role == UserRole.Student || user.Role == UserRole.Staff)

@@ -97,7 +97,7 @@ namespace ZEGU.WebApp.Areas.Mobile.Controllers
             var buildings = await _context.Buildings
                 .Include(b => b.Campus)
                 .Where(b => b.IsActive)
-                .Select(b => new { b.Id, b.BuildingName, b.Code, b.CampusId, CampusName = b.Campus.CampusName })
+                .Select(b => new { b.Id, b.BuildingName, b.Code, b.CampusId, CampusName = b.Campus!.CampusName })
                 .ToListAsync();
             return Ok(buildings);
         }
@@ -131,7 +131,7 @@ namespace ZEGU.WebApp.Areas.Mobile.Controllers
                     r.Priority,
                     r.CreatedAt,
                     CategoryName = r.Category.CategoryName,
-                    BuildingName = r.Location.Building.BuildingName,
+                    BuildingName = r.Location.Building!.BuildingName,
                     RoomNumber = r.Location.RoomNumber
                 })
                 .ToListAsync();
@@ -165,7 +165,7 @@ namespace ZEGU.WebApp.Areas.Mobile.Controllers
                 request.CompletedAt,
                 request.ClosedAt,
                 CategoryName = request.Category.CategoryName,
-                BuildingName = request.Location.Building.BuildingName,
+                BuildingName = request.Location.Building!.BuildingName,
                 RoomNumber = request.Location.RoomNumber,
                 StatusHistory = request.StatusHistory.Select(h => new { h.NewStatus, CreatedAt = h.CreatedAt, h.Comments }),
                 Comments = request.Comments.Select(c => new { c.CommentText, c.CreatedAt }),
@@ -222,7 +222,7 @@ namespace ZEGU.WebApp.Areas.Mobile.Controllers
                 asset.Model,
                 asset.Status,
                 CategoryName = asset.Category.CategoryName,
-                BuildingName = asset.Location.Building.BuildingName,
+                BuildingName = asset.Location.Building!.BuildingName,
                 RoomNumber = asset.Location.RoomNumber,
                 asset.PurchaseDate,
                 asset.WarrantyExpiry

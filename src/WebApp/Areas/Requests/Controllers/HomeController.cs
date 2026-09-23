@@ -33,7 +33,8 @@ namespace ZEGU.WebApp.Areas.Requests.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == User.Identity.Name);
+            var currentUserName = User.Identity?.Name;
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == currentUserName);
             if (user == null) return RedirectToAction("Login", "Account", new { area = "" });
 
             var myRequests = await _context.MaintenanceRequests
@@ -79,7 +80,8 @@ namespace ZEGU.WebApp.Areas.Requests.Controllers
                 return View(model);
             }
 
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == User.Identity.Name);
+            var currentUserName = User.Identity?.Name;
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == currentUserName);
             if (user == null) return RedirectToAction("Login", "Account", new { area = "" });
 
             if (!model.CategoryId.HasValue || !model.LocationId.HasValue)
@@ -237,7 +239,8 @@ namespace ZEGU.WebApp.Areas.Requests.Controllers
 
         public async Task<IActionResult> MyRequests(string? search = null, string? status = null, int pageNumber = 1, int pageSize = 25)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == User.Identity.Name);
+            var currentUserName = User.Identity?.Name;
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == currentUserName);
             if (user == null) return RedirectToAction("Login", "Account", new { area = "" });
 
             pageSize = Math.Clamp(pageSize, 1, 100);
@@ -284,7 +287,8 @@ namespace ZEGU.WebApp.Areas.Requests.Controllers
 
         public async Task<IActionResult> Details(int id)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == User.Identity.Name);
+            var currentUserName = User.Identity?.Name;
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == currentUserName);
             if (user == null) return RedirectToAction("Login", "Account", new { area = "" });
 
             var request = await _context.MaintenanceRequests
@@ -306,7 +310,8 @@ namespace ZEGU.WebApp.Areas.Requests.Controllers
         [HttpPost]
         public async Task<IActionResult> AddComment(int requestId, string commentText)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == User.Identity.Name);
+            var currentUserName = User.Identity?.Name;
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == currentUserName);
             if (user == null) return RedirectToAction("Login", "Account", new { area = "" });
 
             var request = await _context.MaintenanceRequests.FindAsync(requestId);
@@ -363,7 +368,8 @@ namespace ZEGU.WebApp.Areas.Requests.Controllers
         [HttpPost]
         public async Task<IActionResult> SubmitFeedback(int requestId, int rating, string? comments, bool workSatisfactory)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == User.Identity.Name);
+            var currentUserName = User.Identity?.Name;
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == currentUserName);
             if (user == null) return RedirectToAction("Login", "Account", new { area = "" });
 
             var request = await _context.MaintenanceRequests
@@ -408,7 +414,8 @@ namespace ZEGU.WebApp.Areas.Requests.Controllers
         [HttpPost]
         public async Task<IActionResult> Cancel(int requestId)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == User.Identity.Name);
+            var currentUserName = User.Identity?.Name;
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == currentUserName);
             if (user == null) return RedirectToAction("Login", "Account", new { area = "" });
 
             var request = await _context.MaintenanceRequests

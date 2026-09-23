@@ -69,7 +69,7 @@ namespace ZEGU.WebApp.Controllers.Api
             var query = _context.Tickets
                 .Include(t => t.User)
                 .Include(t => t.Location)
-                .Include(t => t.Location.Building)
+                .Include(t => t.Location!.Building)
                 .Where(t => t.IsActive && t.CanTransferToMaintenance)
                 .AsQueryable();
 
@@ -91,7 +91,7 @@ namespace ZEGU.WebApp.Controllers.Api
                     t.Type,
                     t.CreatedAt,
                     UserName = t.User.FirstName + " " + t.User.LastName,
-                    Location = t.Location != null ? t.Location.Building.BuildingName + " - " + t.Location.RoomNumber : null
+                    Location = t.Location != null ? t.Location.Building!.BuildingName + " - " + t.Location.RoomNumber : null
                 })
                 .ToListAsync();
 
@@ -127,7 +127,7 @@ namespace ZEGU.WebApp.Controllers.Api
                     r.CreatedAt,
                     UserName = r.User.FirstName + " " + r.User.LastName,
                     CategoryName = r.Category.CategoryName,
-                    Location = r.Location.Building.BuildingName + " - " + r.Location.RoomNumber
+                    Location = r.Location.Building!.BuildingName + " - " + r.Location.RoomNumber
                 })
                 .ToListAsync();
 
@@ -159,7 +159,7 @@ namespace ZEGU.WebApp.Controllers.Api
                 request.ClosedAt,
                 UserName = request.User.FirstName + " " + request.User.LastName,
                 CategoryName = request.Category.CategoryName,
-                Location = request.Location.Building.BuildingName + " - " + request.Location.RoomNumber
+                Location = request.Location.Building!.BuildingName + " - " + request.Location.RoomNumber
             });
         }
     }

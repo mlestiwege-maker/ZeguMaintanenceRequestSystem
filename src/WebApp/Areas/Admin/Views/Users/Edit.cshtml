@@ -46,7 +46,7 @@
                         <label class="form-label">Department</label>
                         <select name="departmentId" class="form-select">
                             <option value="">-- Select Department --</option>
-                            @foreach (var dept in ViewBag.Departments as List<ZEGU.Core.Entities.Shared.Department>)
+                            @foreach (var dept in (ViewBag.Departments as List<ZEGU.Core.Entities.Shared.Department>) ?? new())
                             {
                                 <option value="@dept.Id" selected="@(Model.DepartmentId == dept.Id ? "selected" : null)">@dept.DepartmentName</option>
                             }

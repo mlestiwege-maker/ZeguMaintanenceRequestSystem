@@ -480,7 +480,7 @@ namespace ZEGU.WebApp.Areas.Admin.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> CreateRoom(int buildingId)
+        public IActionResult CreateRoom(int buildingId)
         {
             ViewBag.BuildingId = buildingId;
             return View();
@@ -796,7 +796,7 @@ namespace ZEGU.WebApp.Areas.Admin.Controllers
                 TotalCost = requests.Sum(r => r.TotalCost),
                 AverageResolutionDays = requests
                     .Where(r => r.CompletedAt.HasValue)
-                    .Select(r => (r.CompletedAt.Value - r.CreatedAt).TotalDays)
+                    .Select(r => (r.CompletedAt!.Value - r.CreatedAt).TotalDays)
                     .DefaultIfEmpty()
                     .Average(),
 
@@ -839,7 +839,7 @@ namespace ZEGU.WebApp.Areas.Admin.Controllers
                     .ToList(),
 
                 RequestsByLocation = requests
-                    .GroupBy(r => r.Location.Building.BuildingName)
+                    .GroupBy(r => r.Location.Building!.BuildingName)
                     .Select(g => new LocationReportItem
                     {
                         BuildingName = g.Key,
@@ -854,7 +854,7 @@ namespace ZEGU.WebApp.Areas.Admin.Controllers
                     .Include(t => t.WorkLogs)
                     .Select(t => new TechnicianPerformanceItem
                     {
-                        TechnicianName = t.User.FirstName + " " + t.User.LastName,
+                        TechnicianName = t.User != null ? t.User.FirstName + " " + t.User.LastName : "Unassigned",
                         TechnicianType = t.TechnicianType.ToString(),
                         TotalAssignments = t.Assignments.Count(a => a.IsActive && a.Request.CreatedAt >= start && a.Request.CreatedAt <= end),
                         TotalWorkLogs = t.WorkLogs.Count(w => w.IsActive),

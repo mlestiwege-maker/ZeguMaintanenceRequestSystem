@@ -14,7 +14,7 @@
                 <h1 class="fw-bold">Welcome to ZEGU Maintenance</h1>
                 <p class="lead mb-4">Submit, track, and manage campus maintenance requests from any device with a cleaner, faster experience built for mobile.</p>
                 <div class="hero-actions justify-content-center justify-content-lg-start">
-                    @if (User.Identity.IsAuthenticated)
+                    @if (User.Identity?.IsAuthenticated == true)
                     {
                         @if (User.IsInRole("Student") || User.IsInRole("Staff"))
                         {
@@ -58,7 +58,7 @@
     </div>
 </div>
 
-@if (User.Identity.IsAuthenticated)
+@if (User.Identity?.IsAuthenticated == true)
 {
     <div class="row row-cols-1 row-cols-md-3 g-3 dashboard-section">
         <div class="col">

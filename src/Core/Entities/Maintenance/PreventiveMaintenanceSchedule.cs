@@ -17,7 +17,6 @@ namespace ZEGU.Core.Entities.Maintenance
         public int FrequencyDays { get; set; }
         public DateTime? LastPerformed { get; set; }
         public DateTime NextDue { get; set; }
-        public bool IsActive { get; set; } = true;
         public ICollection<PreventiveMaintenanceRecord> Records { get; set; } = new List<PreventiveMaintenanceRecord>();
     }
 }
