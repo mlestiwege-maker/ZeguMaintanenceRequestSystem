@@ -49,6 +49,9 @@ Migrations/*.Designer.cs
 .env
 appsettings.*.local.json
 
+# User-uploaded content (request photos, QR codes) - runtime data, not source
+src/WebApp/wwwroot/uploads/
+
 # OS generated files
 .DS_Store
 .DS_Store?
