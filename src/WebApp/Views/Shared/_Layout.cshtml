@@ -53,42 +53,44 @@
                     @if (User.IsInRole(nameof(UserRole.WorksOfficer)) || User.IsInRole(nameof(UserRole.Manager)) || User.IsInRole(nameof(UserRole.Admin)))
                     {
                         <li class="nav-section">Works</li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        <li class="nav-item">
+                            <a class="nav-link submenu-toggle" href="#" role="button" data-bs-toggle="collapse" data-bs-target="#worksSubmenu" aria-expanded="false" aria-controls="worksSubmenu">
                                 <i class="bi bi-wrench"></i> Management
+                                <i class="bi bi-chevron-down submenu-caret"></i>
                             </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" asp-area="Works" asp-controller="Home" asp-action="Index" onclick="closeSidebar()">Dashboard</a></li>
-                                <li><a class="dropdown-item" asp-area="Works" asp-controller="Home" asp-action="AllRequests" onclick="closeSidebar()">All Requests</a></li>
-                                <li><a class="dropdown-item" asp-area="Works" asp-controller="Home" asp-action="SLADashboard" onclick="closeSidebar()">SLA Dashboard</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" asp-area="Works" asp-controller="Technicians" asp-action="Workload" onclick="closeSidebar()">Technician Workload</a></li>
+                            <ul class="collapse sidebar-submenu" id="worksSubmenu">
+                                <li><a class="submenu-link" asp-area="Works" asp-controller="Home" asp-action="Index" onclick="closeSidebar()">Dashboard</a></li>
+                                <li><a class="submenu-link" asp-area="Works" asp-controller="Home" asp-action="AllRequests" onclick="closeSidebar()">All Requests</a></li>
+                                <li><a class="submenu-link" asp-area="Works" asp-controller="Home" asp-action="SLADashboard" onclick="closeSidebar()">SLA Dashboard</a></li>
+                                <li><hr class="submenu-divider"></li>
+                                <li><a class="submenu-link" asp-area="Works" asp-controller="Technicians" asp-action="Workload" onclick="closeSidebar()">Technician Workload</a></li>
                             </ul>
                         </li>
                     }
                     @if (User.IsInRole(nameof(UserRole.Manager)) || User.IsInRole(nameof(UserRole.Admin)))
                     {
                         <li class="nav-section">Administration</li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        <li class="nav-item">
+                            <a class="nav-link submenu-toggle" href="#" role="button" data-bs-toggle="collapse" data-bs-target="#adminSubmenu" aria-expanded="false" aria-controls="adminSubmenu">
                                 <i class="bi bi-gear"></i> Manage
+                                <i class="bi bi-chevron-down submenu-caret"></i>
                             </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" asp-area="Admin" asp-controller="Home" asp-action="Index" onclick="closeSidebar()">Dashboard</a></li>
-                                <li><a class="dropdown-item" asp-area="Admin" asp-controller="Assets" asp-action="Index" onclick="closeSidebar()">Assets</a></li>
-                                <li><a class="dropdown-item" asp-area="Admin" asp-controller="PreventiveMaintenance" asp-action="Index" onclick="closeSidebar()">Preventive Maintenance</a></li>
-                                <li><a class="dropdown-item" asp-area="Admin" asp-controller="Users" asp-action="Index" onclick="closeSidebar()">Users</a></li>
-                                <li><a class="dropdown-item" asp-area="Admin" asp-controller="Departments" asp-action="Index" onclick="closeSidebar()">Departments</a></li>
-                                <li><a class="dropdown-item" asp-area="Admin" asp-controller="Categories" asp-action="Index" onclick="closeSidebar()">Categories</a></li>
-                                <li><a class="dropdown-item" asp-area="Admin" asp-controller="Locations" asp-action="Index" onclick="closeSidebar()">Locations</a></li>
-                                <li><a class="dropdown-item" asp-area="Admin" asp-controller="Campuses" asp-action="Index" onclick="closeSidebar()">Campuses</a></li>
-                                <li><a class="dropdown-item" asp-area="Admin" asp-controller="Technicians" asp-action="Index" onclick="closeSidebar()">Technicians</a></li>
-                                <li><a class="dropdown-item" asp-area="Admin" asp-controller="Materials" asp-action="Index" onclick="closeSidebar()">Materials</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" asp-area="Admin" asp-controller="Reports" asp-action="Index" onclick="closeSidebar()">Reports</a></li>
-                                <li><a class="dropdown-item" asp-area="Admin" asp-controller="NotificationTemplates" asp-action="Index" onclick="closeSidebar()">Notification Templates</a></li>
-                                <li><a class="dropdown-item" asp-area="Admin" asp-controller="Settings" asp-action="Index" onclick="closeSidebar()">Settings</a></li>
-                                <li><a class="dropdown-item" asp-area="Admin" asp-controller="AuditLogs" asp-action="Index" onclick="closeSidebar()">Audit Logs</a></li>
+                            <ul class="collapse sidebar-submenu" id="adminSubmenu">
+                                <li><a class="submenu-link" asp-area="Admin" asp-controller="Home" asp-action="Index" onclick="closeSidebar()">Dashboard</a></li>
+                                <li><a class="submenu-link" asp-area="Admin" asp-controller="Assets" asp-action="Index" onclick="closeSidebar()">Assets</a></li>
+                                <li><a class="submenu-link" asp-area="Admin" asp-controller="PreventiveMaintenance" asp-action="Index" onclick="closeSidebar()">Preventive Maintenance</a></li>
+                                <li><a class="submenu-link" asp-area="Admin" asp-controller="Users" asp-action="Index" onclick="closeSidebar()">Users</a></li>
+                                <li><a class="submenu-link" asp-area="Admin" asp-controller="Departments" asp-action="Index" onclick="closeSidebar()">Departments</a></li>
+                                <li><a class="submenu-link" asp-area="Admin" asp-controller="Categories" asp-action="Index" onclick="closeSidebar()">Categories</a></li>
+                                <li><a class="submenu-link" asp-area="Admin" asp-controller="Locations" asp-action="Index" onclick="closeSidebar()">Locations</a></li>
+                                <li><a class="submenu-link" asp-area="Admin" asp-controller="Campuses" asp-action="Index" onclick="closeSidebar()">Campuses</a></li>
+                                <li><a class="submenu-link" asp-area="Admin" asp-controller="Technicians" asp-action="Index" onclick="closeSidebar()">Technicians</a></li>
+                                <li><a class="submenu-link" asp-area="Admin" asp-controller="Materials" asp-action="Index" onclick="closeSidebar()">Materials</a></li>
+                                <li><hr class="submenu-divider"></li>
+                                <li><a class="submenu-link" asp-area="Admin" asp-controller="Reports" asp-action="Index" onclick="closeSidebar()">Reports</a></li>
+                                <li><a class="submenu-link" asp-area="Admin" asp-controller="NotificationTemplates" asp-action="Index" onclick="closeSidebar()">Notification Templates</a></li>
+                                <li><a class="submenu-link" asp-area="Admin" asp-controller="Settings" asp-action="Index" onclick="closeSidebar()">Settings</a></li>
+                                <li><a class="submenu-link" asp-area="Admin" asp-controller="AuditLogs" asp-action="Index" onclick="closeSidebar()">Audit Logs</a></li>
                             </ul>
                         </li>
                     }
