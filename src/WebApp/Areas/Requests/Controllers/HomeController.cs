@@ -103,7 +103,7 @@ namespace ZEGU.WebApp.Areas.Requests.Controllers
                 return View(model);
             }
 
-            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp" };
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".pdf", ".doc", ".docx" };
             if (model.Photos != null)
             {
                 foreach (var photo in model.Photos)
@@ -122,7 +122,7 @@ namespace ZEGU.WebApp.Areas.Requests.Controllers
                     var fileExtension = Path.GetExtension(photo.FileName).ToLower();
                     if (!allowedExtensions.Contains(fileExtension))
                     {
-                        TempData["ErrorMessage"] = "Only image files are allowed (jpg, jpeg, png, gif, bmp)";
+                        TempData["ErrorMessage"] = "Only images (jpg, jpeg, png, gif, bmp) or documents (pdf, doc, docx) are allowed";
                         model.Categories = await _context.MaintenanceCategories.Where(c => c.IsActive).ToListAsync();
                         model.Buildings = await _context.Buildings.Include(b => b.Campus).Where(b => b.IsActive).ToListAsync();
                         model.Departments = await _context.Departments.Where(d => d.IsActive).ToListAsync();
@@ -245,6 +245,12 @@ namespace ZEGU.WebApp.Areas.Requests.Controllers
                         <p>We'll email you again as soon as there's an update or reply on this request.</p>";
                     _ = _emailService.SendEmailAsync(user.Email, subject, body, isHtml: true);
                 }
+            }
+
+            if (!string.IsNullOrEmpty(user.PhoneNumber))
+            {
+                _ = _smsService.SendMaintenanceNotificationAsync(user.PhoneNumber, user.FirstName, request.RequestNumber, "Submitted");
+                _ = _whatsAppService.SendMaintenanceNotificationAsync(user.PhoneNumber, user.FirstName, request.RequestNumber, "Submitted");
             }
 
             TempData["SuccessMessage"] = $"Maintenance request {request.RequestNumber} submitted successfully!";

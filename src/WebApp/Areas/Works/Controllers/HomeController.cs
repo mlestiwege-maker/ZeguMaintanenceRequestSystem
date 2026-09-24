@@ -22,14 +22,18 @@ namespace ZEGU.WebApp.Areas.Works.Controllers
         private readonly SLAMonitoringService _slaMonitoringService;
         private readonly AuditService _auditService;
         private readonly EmailService _emailService;
+        private readonly SmsService _smsService;
+        private readonly WhatsAppService _whatsAppService;
 
-        public HomeController(ApplicationDbContext context, NotificationService notificationService, SLAMonitoringService slaMonitoringService, AuditService auditService, EmailService emailService)
+        public HomeController(ApplicationDbContext context, NotificationService notificationService, SLAMonitoringService slaMonitoringService, AuditService auditService, EmailService emailService, SmsService smsService, WhatsAppService whatsAppService)
         {
             _context = context;
             _notificationService = notificationService;
             _slaMonitoringService = slaMonitoringService;
             _auditService = auditService;
             _emailService = emailService;
+            _smsService = smsService;
+            _whatsAppService = whatsAppService;
         }
 
         public async Task<IActionResult> Index()
@@ -516,6 +520,13 @@ namespace ZEGU.WebApp.Areas.Works.Controllers
                         _ = _emailService.SendEmailAsync(request.User.Email, subject, body, isHtml: true);
                     }
                 }
+
+                if (!string.IsNullOrEmpty(request.User.PhoneNumber))
+                {
+                    var smsBody = $"Reply on request {request.RequestNumber}: {commentText}";
+                    _ = _smsService.SendSmsAsync(request.User.PhoneNumber, smsBody);
+                    _ = _whatsAppService.SendWhatsAppAsync(request.User.PhoneNumber, smsBody);
+                }
             }
 
             TempData["SuccessMessage"] = "Reply added successfully";
@@ -593,25 +604,34 @@ namespace ZEGU.WebApp.Areas.Works.Controllers
         private async Task SendRequesterStatusEmailAsync(MaintenanceRequest request, string templateName, string fallbackHtmlMessage)
         {
             var requester = await _context.Users.FindAsync(request.UserId);
-            if (requester == null || string.IsNullOrEmpty(requester.Email)) return;
+            if (requester == null) return;
 
-            var template = await _notificationService.RenderTemplateAsync(templateName, new Dictionary<string, string>
+            if (!string.IsNullOrEmpty(requester.Email))
             {
-                ["RequestNumber"] = request.RequestNumber,
-                ["Title"] = request.Title,
-                ["UserName"] = $"{requester.FirstName} {requester.LastName}",
-                ["Status"] = request.Status.ToString()
-            });
+                var template = await _notificationService.RenderTemplateAsync(templateName, new Dictionary<string, string>
+                {
+                    ["RequestNumber"] = request.RequestNumber,
+                    ["Title"] = request.Title,
+                    ["UserName"] = $"{requester.FirstName} {requester.LastName}",
+                    ["Status"] = request.Status.ToString()
+                });
 
-            if (template.HasValue)
-            {
-                _ = _emailService.SendEmailAsync(requester.Email, template.Value.Subject, template.Value.Body, isHtml: true);
+                if (template.HasValue)
+                {
+                    _ = _emailService.SendEmailAsync(requester.Email, template.Value.Subject, template.Value.Body, isHtml: true);
+                }
+                else
+                {
+                    var subject = $"Update on your request {request.RequestNumber}";
+                    var body = $"<p>Hi {requester.FirstName},</p><p>{fallbackHtmlMessage}</p>";
+                    _ = _emailService.SendEmailAsync(requester.Email, subject, body, isHtml: true);
+                }
             }
-            else
+
+            if (!string.IsNullOrEmpty(requester.PhoneNumber))
             {
-                var subject = $"Update on your request {request.RequestNumber}";
-                var body = $"<p>Hi {requester.FirstName},</p><p>{fallbackHtmlMessage}</p>";
-                _ = _emailService.SendEmailAsync(requester.Email, subject, body, isHtml: true);
+                _ = _smsService.SendMaintenanceNotificationAsync(requester.PhoneNumber, requester.FirstName, request.RequestNumber, request.Status.ToString());
+                _ = _whatsAppService.SendMaintenanceNotificationAsync(requester.PhoneNumber, requester.FirstName, request.RequestNumber, request.Status.ToString());
             }
         }
     }

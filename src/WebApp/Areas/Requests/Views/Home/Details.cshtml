@@ -151,14 +151,15 @@
         {
             <div class="card mb-3">
                 <div class="card-header">
-                    <h5><i class="bi bi-images"></i> Photos</h5>
+                    <h5><i class="bi bi-images"></i> Attachments</h5>
                 </div>
                 <div class="card-body">
                     @foreach (var attachment in Model.Attachments)
                     {
+                        var isImage = attachment.FileType != null && attachment.FileType.StartsWith("image/");
                         <div class="mb-2">
                             <a href="@attachment.FilePath" target="_blank" class="btn btn-sm btn-outline-primary">
-                                <i class="bi bi-image"></i> @attachment.FileName
+                                <i class="bi @(isImage ? "bi-image" : "bi-file-earmark-text")"></i> @attachment.FileName
                             </a>
                         </div>
                     }

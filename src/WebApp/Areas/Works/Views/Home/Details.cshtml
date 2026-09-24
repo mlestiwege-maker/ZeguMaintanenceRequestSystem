@@ -171,7 +171,7 @@
         {
             <div class="card mb-3">
                 <div class="card-header">
-                    <h5><i class="bi bi-images"></i> Photos</h5>
+                    <h5><i class="bi bi-images"></i> Attachments</h5>
                 </div>
                 <div class="card-body">
                     <div class="row">
@@ -179,7 +179,17 @@
                         {
                             <div class="col-md-6 mb-3">
                                 <div class="card">
-                                    <img src="@attachment.FilePath" class="card-img-top" alt="Before photo" style="max-height: 200px; object-fit: cover;" />
+                                    @if (attachment.FileType != null && attachment.FileType.StartsWith("image/"))
+                                    {
+                                        <img src="@attachment.FilePath" class="card-img-top" alt="Before photo" style="max-height: 200px; object-fit: cover;" />
+                                    }
+                                    else
+                                    {
+                                        <a href="@attachment.FilePath" target="_blank" class="d-flex flex-column align-items-center justify-content-center py-4 text-decoration-none">
+                                            <i class="bi bi-file-earmark-text" style="font-size: 2.5rem;"></i>
+                                            <small class="text-truncate px-2">@attachment.FileName</small>
+                                        </a>
+                                    }
                                     <div class="card-body p-2">
                                         <small class="text-muted"><i class="bi bi-camera"></i> Before</small>
                                     </div>
