@@ -864,18 +864,61 @@ namespace ZEGU.WebApp.Areas.Admin.Controllers
                     })
                     .ToListAsync(),
 
-                MonthlyTrends = await Task.Run(() => requests
-                    .GroupBy(r => r.CreatedAt.Year)
+                MonthlyTrends = requests
+                    .GroupBy(r => new DateTime(r.CreatedAt.Year, r.CreatedAt.Month, 1))
                     .Select(g => new MonthlyReportItem
                     {
-                        Month = g.Key.ToString(),
+                        SortKey = g.Key,
+                        Month = g.Key.ToString("MMM yyyy"),
                         RequestCount = g.Count(),
                         CompletedCount = g.Count(r => r.Status == MaintenanceRequestStatus.Completed),
                         TotalCost = g.Sum(r => r.TotalCost)
                     })
-                    .OrderBy(m => m.Month)
-                    .ToList())
+                    .OrderBy(m => m.SortKey)
+                    .ToList()
             };
+
+            var now = DateTime.UtcNow;
+            var slaEligible = requests.Where(r => r.Category.SLAHours.HasValue).ToList();
+
+            foreach (var r in slaEligible)
+            {
+                var deadline = r.CreatedAt.AddHours(r.Category.SLAHours!.Value);
+                if (r.Status == MaintenanceRequestStatus.Completed && r.CompletedAt.HasValue)
+                {
+                    if (r.CompletedAt.Value <= deadline) report.SlaMetCount++;
+                    else report.SlaBreachedCount++;
+                }
+                else if (r.Status != MaintenanceRequestStatus.Rejected && now > deadline)
+                {
+                    report.SlaBreachedCount++;
+                    report.CurrentlyOverdueCount++;
+                }
+            }
+
+            var slaTotal = report.SlaMetCount + report.SlaBreachedCount;
+            report.SlaCompliancePercentage = slaTotal > 0 ? report.SlaMetCount * 100.0 / slaTotal : null;
+
+            report.SlaByCategory = slaEligible
+                .GroupBy(r => r.Category.CategoryName)
+                .Select(g =>
+                {
+                    var met = g.Count(r => r.Status == MaintenanceRequestStatus.Completed && r.CompletedAt.HasValue && r.CompletedAt.Value <= r.CreatedAt.AddHours(r.Category.SLAHours!.Value));
+                    var breached = g.Count(r =>
+                        (r.Status == MaintenanceRequestStatus.Completed && r.CompletedAt.HasValue && r.CompletedAt.Value > r.CreatedAt.AddHours(r.Category.SLAHours!.Value)) ||
+                        (r.Status != MaintenanceRequestStatus.Completed && r.Status != MaintenanceRequestStatus.Rejected && now > r.CreatedAt.AddHours(r.Category.SLAHours!.Value)));
+                    var total = met + breached;
+                    return new SlaCategoryItem
+                    {
+                        CategoryName = g.Key,
+                        MetCount = met,
+                        BreachedCount = breached,
+                        CompliancePercentage = total > 0 ? met * 100.0 / total : null
+                    };
+                })
+                .Where(s => s.MetCount + s.BreachedCount > 0)
+                .OrderBy(s => s.CategoryName)
+                .ToList();
 
             return View(report);
         }

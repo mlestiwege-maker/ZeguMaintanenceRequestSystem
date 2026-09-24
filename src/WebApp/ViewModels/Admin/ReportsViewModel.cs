@@ -46,10 +46,19 @@ namespace ZEGU.WebApp.ViewModels.Admin
 
     public class MonthlyReportItem
     {
+        public DateTime SortKey { get; set; }
         public string Month { get; set; } = string.Empty;
         public int RequestCount { get; set; }
         public int CompletedCount { get; set; }
         public decimal? TotalCost { get; set; }
+    }
+
+    public class SlaCategoryItem
+    {
+        public string CategoryName { get; set; } = string.Empty;
+        public int MetCount { get; set; }
+        public int BreachedCount { get; set; }
+        public double? CompliancePercentage { get; set; }
     }
 
     public class ReportsViewModel
@@ -67,5 +76,10 @@ namespace ZEGU.WebApp.ViewModels.Admin
         public int TotalRequests { get; set; }
         public int CompletedRequests { get; set; }
         public double? AverageResolutionDays { get; set; }
+        public int SlaMetCount { get; set; }
+        public int SlaBreachedCount { get; set; }
+        public double? SlaCompliancePercentage { get; set; }
+        public int CurrentlyOverdueCount { get; set; }
+        public List<SlaCategoryItem> SlaByCategory { get; set; } = new();
     }
 }
