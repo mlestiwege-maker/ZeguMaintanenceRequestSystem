@@ -179,6 +179,7 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.Services.AddScoped<ZEGU.Infrastructure.Services.NotificationService>();
 builder.Services.AddScoped<ZEGU.Infrastructure.Services.SLAMonitoringService>();
+builder.Services.AddScoped<ZEGU.Infrastructure.Services.PreventiveMaintenanceReminderService>();
 builder.Services.AddScoped<ZEGU.Infrastructure.Services.AuditService>();
 builder.Services.AddScoped<ZEGU.WebApp.Services.EmailService>();
 builder.Services.AddScoped<ZEGU.WebApp.Services.SmsService>();
@@ -188,6 +189,7 @@ builder.Services.AddScoped<ZEGU.WebApp.Services.DataExportService>();
 builder.Services.AddSingleton<ZEGU.WebApp.Services.RateLimitService>();
 
 builder.Services.AddHostedService<ZEGU.WebApp.Services.SLAMonitoringBackgroundService>();
+builder.Services.AddHostedService<ZEGU.WebApp.Services.PreventiveMaintenanceReminderBackgroundService>();
 
 builder.Services.AddHttpsRedirection(options =>
 {

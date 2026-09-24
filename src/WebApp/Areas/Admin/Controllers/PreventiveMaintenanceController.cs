@@ -5,6 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using ZEGU.Core.Entities.Maintenance;
 using ZEGU.Core.Enums;
 using ZEGU.Infrastructure.Data;
+using ZEGU.Infrastructure.Services;
+using ZEGU.WebApp.Services;
 
 namespace ZEGU.WebApp.Areas.Admin.Controllers
 {
@@ -13,10 +15,23 @@ namespace ZEGU.WebApp.Areas.Admin.Controllers
     public class PreventiveMaintenanceController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly PreventiveMaintenanceReminderService _reminderService;
+        private readonly EmailService _emailService;
+        private readonly SmsService _smsService;
+        private readonly WhatsAppService _whatsAppService;
 
-        public PreventiveMaintenanceController(ApplicationDbContext context)
+        public PreventiveMaintenanceController(
+            ApplicationDbContext context,
+            PreventiveMaintenanceReminderService reminderService,
+            EmailService emailService,
+            SmsService smsService,
+            WhatsAppService whatsAppService)
         {
             _context = context;
+            _reminderService = reminderService;
+            _emailService = emailService;
+            _smsService = smsService;
+            _whatsAppService = whatsAppService;
         }
 
         public async Task<IActionResult> Index()
@@ -162,6 +177,18 @@ namespace ZEGU.WebApp.Areas.Admin.Controllers
             await _context.SaveChangesAsync();
 
             TempData["SuccessMessage"] = schedule.IsActive ? "Schedule activated!" : "Schedule deactivated!";
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CheckDueNow()
+        {
+            var events = await _reminderService.CheckDueSchedulesAsync();
+            PreventiveMaintenanceReminderDispatcher.Dispatch(events, _emailService, _smsService, _whatsAppService);
+
+            TempData["SuccessMessage"] = events.Count > 0
+                ? $"Sent {events.Count} reminder(s) for due/overdue schedules."
+                : "No schedules are due or overdue right now.";
             return RedirectToAction(nameof(Index));
         }
     }

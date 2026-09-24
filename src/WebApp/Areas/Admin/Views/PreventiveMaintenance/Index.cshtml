@@ -8,9 +8,17 @@
         <h2><i class="bi bi-calendar-check"></i> Preventive Maintenance</h2>
         <p class="page-subtitle">Manage scheduled maintenance activities</p>
     </div>
-    <a asp-action="Create" class="btn btn-primary">
-        <i class="bi bi-plus-circle"></i> New Schedule
-    </a>
+    <div class="d-flex gap-2">
+        <form asp-action="CheckDueNow" method="post">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn btn-outline-secondary">
+                <i class="bi bi-bell"></i> Check Due Schedules Now
+            </button>
+        </form>
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> New Schedule
+        </a>
+    </div>
 </div>
 
 <div class="card">
