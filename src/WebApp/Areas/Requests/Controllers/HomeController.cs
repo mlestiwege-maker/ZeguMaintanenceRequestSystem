@@ -103,6 +103,34 @@ namespace ZEGU.WebApp.Areas.Requests.Controllers
                 return View(model);
             }
 
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp" };
+            if (model.Photos != null)
+            {
+                foreach (var photo in model.Photos)
+                {
+                    if (photo.Length == 0) continue;
+
+                    if (photo.Length > 5 * 1024 * 1024)
+                    {
+                        TempData["ErrorMessage"] = "File size must be less than 5MB";
+                        model.Categories = await _context.MaintenanceCategories.Where(c => c.IsActive).ToListAsync();
+                        model.Buildings = await _context.Buildings.Include(b => b.Campus).Where(b => b.IsActive).ToListAsync();
+                        model.Departments = await _context.Departments.Where(d => d.IsActive).ToListAsync();
+                        return View(model);
+                    }
+
+                    var fileExtension = Path.GetExtension(photo.FileName).ToLower();
+                    if (!allowedExtensions.Contains(fileExtension))
+                    {
+                        TempData["ErrorMessage"] = "Only image files are allowed (jpg, jpeg, png, gif, bmp)";
+                        model.Categories = await _context.MaintenanceCategories.Where(c => c.IsActive).ToListAsync();
+                        model.Buildings = await _context.Buildings.Include(b => b.Campus).Where(b => b.IsActive).ToListAsync();
+                        model.Departments = await _context.Departments.Where(d => d.IsActive).ToListAsync();
+                        return View(model);
+                    }
+                }
+            }
+
             var request = new MaintenanceRequest
             {
                 RequestNumber = $"MRS-{DateTime.UtcNow.Year}-TEMP",
@@ -129,41 +157,27 @@ namespace ZEGU.WebApp.Areas.Requests.Controllers
 
                 foreach (var photo in model.Photos)
                 {
-                    if (photo.Length > 0)
+                    if (photo.Length == 0) continue;
+
+                    var fileExtension = Path.GetExtension(photo.FileName).ToLower();
+                    var fileName = $"{Guid.NewGuid()}{fileExtension}";
+                    var filePath = Path.Combine(uploadsFolder, fileName);
+
+                    using (var stream = new FileStream(filePath, FileMode.Create))
                     {
-                        if (photo.Length > 5 * 1024 * 1024)
-                        {
-                            TempData["ErrorMessage"] = "File size must be less than 5MB";
-                            return RedirectToAction(nameof(Create));
-                        }
-
-                        var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp" };
-                        var fileExtension = Path.GetExtension(photo.FileName).ToLower();
-                        if (!allowedExtensions.Contains(fileExtension))
-                        {
-                            TempData["ErrorMessage"] = "Only image files are allowed (jpg, jpeg, png, gif, bmp)";
-                            return RedirectToAction(nameof(Create));
-                        }
-
-                        var fileName = $"{Guid.NewGuid()}{fileExtension}";
-                        var filePath = Path.Combine(uploadsFolder, fileName);
-                        
-                        using (var stream = new FileStream(filePath, FileMode.Create))
-                        {
-                            await photo.CopyToAsync(stream);
-                        }
-
-                        _context.RequestAttachments.Add(new RequestAttachment
-                        {
-                            RequestId = request.Id,
-                            FileName = photo.FileName,
-                            FilePath = $"/uploads/maintenance/{request.RequestNumber}/{fileName}",
-                            FileSize = photo.Length,
-                            FileType = photo.ContentType,
-                            UploadedById = user.Id,
-                            IsBeforePhoto = true
-                        });
+                        await photo.CopyToAsync(stream);
                     }
+
+                    _context.RequestAttachments.Add(new RequestAttachment
+                    {
+                        RequestId = request.Id,
+                        FileName = photo.FileName,
+                        FilePath = $"/uploads/maintenance/{request.RequestNumber}/{fileName}",
+                        FileSize = photo.Length,
+                        FileType = photo.ContentType,
+                        UploadedById = user.Id,
+                        IsBeforePhoto = true
+                    });
                 }
                 await _context.SaveChangesAsync();
             }
