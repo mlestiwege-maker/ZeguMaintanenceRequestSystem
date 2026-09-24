@@ -52,6 +52,9 @@ appsettings.*.local.json
 # User-uploaded content (request photos, QR codes) - runtime data, not source
 src/WebApp/wwwroot/uploads/
 
+# Database backups - runtime data, not source
+backups/
+
 # OS generated files
 .DS_Store
 .DS_Store?
