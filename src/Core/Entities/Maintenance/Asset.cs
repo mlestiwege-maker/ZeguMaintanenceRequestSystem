@@ -18,6 +18,7 @@ namespace ZEGU.Core.Entities.Maintenance
         public string? Manufacturer { get; set; }
         public string? Model { get; set; }
         public string? Status { get; set; }
+        public string? Condition { get; set; }
         public string? QrCodePath { get; set; }
         public string? BarcodePath { get; set; }
         public ICollection<MaintenanceRequest> MaintenanceRequests { get; set; } = new List<MaintenanceRequest>();

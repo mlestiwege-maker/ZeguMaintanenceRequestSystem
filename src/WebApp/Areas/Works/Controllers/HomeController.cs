@@ -455,6 +455,7 @@ namespace ZEGU.WebApp.Areas.Works.Controllers
                 .Include(r => r.Category)
                 .Include(r => r.Location)
                 .Include(r => r.Location.Building)
+                .Include(r => r.Asset)
                 .Include(r => r.StatusHistory)
                 .Include(r => r.Comments)
                 .ThenInclude(c => c.User)
@@ -464,7 +465,37 @@ namespace ZEGU.WebApp.Areas.Works.Controllers
                 .FirstOrDefaultAsync(r => r.Id == id && r.IsActive);
 
             if (request == null) return NotFound();
+
+            ViewBag.LocationAssets = await _context.Assets
+                .Where(a => a.LocationId == request.LocationId && a.IsActive)
+                .OrderBy(a => a.AssetName)
+                .ToListAsync();
+
             return View(request);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SetAsset(int requestId, int? assetId)
+        {
+            var request = await _context.MaintenanceRequests.FindAsync(requestId);
+            if (request == null) return NotFound();
+
+            if (assetId.HasValue)
+            {
+                var asset = await _context.Assets.FirstOrDefaultAsync(a => a.Id == assetId.Value && a.IsActive);
+                if (asset == null)
+                {
+                    TempData["ErrorMessage"] = "Selected asset is invalid.";
+                    return RedirectToAction(nameof(Details), new { id = requestId });
+                }
+            }
+
+            request.AssetId = assetId;
+            request.UpdatedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = assetId.HasValue ? "Asset linked to this request." : "Asset link removed.";
+            return RedirectToAction(nameof(Details), new { id = requestId });
         }
 
         [HttpPost]

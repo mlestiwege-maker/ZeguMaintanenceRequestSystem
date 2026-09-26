@@ -61,6 +61,7 @@
                             <th class="hide-mobile">Category</th>
                             <th class="hide-mobile">Location</th>
                             <th>Status</th>
+                            <th class="hide-mobile">Condition</th>
                             <th class="hide-mobile">Manufacturer</th>
                             <th class="hide-mobile">Warranty</th>
                             <th>Actions</th>
@@ -82,6 +83,21 @@
                                 <td data-label="Location" class="hide-mobile">@asset.Location?.RoomNumber</td>
                                 <td data-label="Status">
                                     <span class="badge status-@asset.Status?.Replace(" ", "").ToLower()">@asset.Status</span>
+                                </td>
+                                <td data-label="Condition" class="hide-mobile">
+                                    @{
+                                        var conditionBadgeClass = asset.Condition switch
+                                        {
+                                            "Excellent" or "Good" => "bg-success",
+                                            "Fair" => "bg-warning text-dark",
+                                            "Poor" or "Critical" => "bg-danger",
+                                            _ => "bg-secondary"
+                                        };
+                                    }
+                                    @if (!string.IsNullOrEmpty(asset.Condition))
+                                    {
+                                        <span class="badge @conditionBadgeClass">@asset.Condition</span>
+                                    }
                                 </td>
                                 <td data-label="Manufacturer" class="hide-mobile">@asset.Manufacturer</td>
                                 <td data-label="Warranty" class="hide-mobile">

@@ -209,6 +209,49 @@
 </div>
 
 <div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-tools"></i> Assets with Repeat Failures</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.AssetPerformance.Any())
+                {
+                    <canvas id="assetPerformanceChart" height="180"></canvas>
+                    <div class="table-responsive mt-3">
+                        <table class="table table-sm table-mobile-cards">
+                            <thead>
+                                <tr>
+                                    <th>Asset</th>
+                                    <th>Repairs</th>
+                                    <th>Total Cost</th>
+                                    <th>Last Maintenance</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var asset in Model.AssetPerformance)
+                                {
+                                    <tr>
+                                        <td data-label="Asset">@asset.AssetName @(!string.IsNullOrEmpty(asset.AssetCode) ? $"({asset.AssetCode})" : "")</td>
+                                        <td data-label="Repairs"><span class="badge @(asset.RepairCount >= 5 ? "bg-danger" : asset.RepairCount >= 3 ? "bg-warning text-dark" : "bg-secondary")">@asset.RepairCount</span></td>
+                                        <td data-label="Total Cost">@asset.TotalCost?.ToString("C")</td>
+                                        <td data-label="Last Maintenance">@asset.LastMaintenanceDate.ToString("dd MMM yyyy")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted">No requests are linked to a registered asset for the selected period.</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
     <div class="col-md-6">
         <div class="card">
             <div class="card-header">
@@ -480,6 +523,28 @@
             options: {
                 responsive: true,
                 scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true, ticks: { precision: 0 } } }
+            }
+        });
+            </text>
+        }
+
+        @if (Model.AssetPerformance.Any())
+        {
+            <text>
+        new Chart(document.getElementById('assetPerformanceChart'), {
+            type: 'bar',
+            data: {
+                labels: @Html.Raw(Json.Serialize(Model.AssetPerformance.Select(a => a.AssetCode ?? a.AssetName))),
+                datasets: [{
+                    label: 'Repairs',
+                    data: @Html.Raw(Json.Serialize(Model.AssetPerformance.Select(a => a.RepairCount))),
+                    backgroundColor: '#fd7e14'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
             }
         });
             </text>

@@ -53,6 +53,28 @@
                                 <td><span class="badge status-@Model.Status?.Replace(" ", "").ToLower()">@Model.Status</span></td>
                             </tr>
                             <tr>
+                                <td class="text-muted">Condition:</td>
+                                <td>
+                                    @{
+                                        var conditionClass = Model.Condition switch
+                                        {
+                                            "Excellent" or "Good" => "bg-success",
+                                            "Fair" => "bg-warning text-dark",
+                                            "Poor" or "Critical" => "bg-danger",
+                                            _ => "bg-secondary"
+                                        };
+                                    }
+                                    @if (!string.IsNullOrEmpty(Model.Condition))
+                                    {
+                                        <span class="badge @conditionClass">@Model.Condition</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Not set</span>
+                                    }
+                                </td>
+                            </tr>
+                            <tr>
                                 <td class="text-muted">Manufacturer:</td>
                                 <td>@Model.Manufacturer</td>
                             </tr>

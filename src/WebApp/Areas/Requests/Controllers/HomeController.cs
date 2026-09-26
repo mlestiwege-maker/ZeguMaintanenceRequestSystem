@@ -103,6 +103,13 @@ namespace ZEGU.WebApp.Areas.Requests.Controllers
                 return View(model);
             }
 
+            int? validatedAssetId = null;
+            if (model.AssetId.HasValue)
+            {
+                var asset = await _context.Assets.FirstOrDefaultAsync(a => a.Id == model.AssetId.Value && a.IsActive && a.LocationId == model.LocationId.Value);
+                if (asset != null) validatedAssetId = asset.Id;
+            }
+
             var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".pdf", ".doc", ".docx" };
             if (model.Photos != null)
             {
@@ -138,6 +145,7 @@ namespace ZEGU.WebApp.Areas.Requests.Controllers
                 DepartmentId = model.DepartmentId,
                 CategoryId = model.CategoryId.Value,
                 LocationId = model.LocationId.Value,
+                AssetId = validatedAssetId,
                 Title = model.Title,
                 Description = model.Description,
                 Priority = model.Priority,

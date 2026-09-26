@@ -781,6 +781,7 @@ namespace ZEGU.WebApp.Areas.Admin.Controllers
                 .Include(r => r.Category)
                 .Include(r => r.Assignments)
                 .Include(r => r.Department)
+                .Include(r => r.Asset)
                 .Include(r => r.Location)
                 .ThenInclude(l => l.Building)
                 .Where(r => r.IsActive && r.CreatedAt >= start && r.CreatedAt <= end);
@@ -918,6 +919,21 @@ namespace ZEGU.WebApp.Areas.Admin.Controllers
                 })
                 .Where(s => s.MetCount + s.BreachedCount > 0)
                 .OrderBy(s => s.CategoryName)
+                .ToList();
+
+            report.AssetPerformance = requests
+                .Where(r => r.Asset != null)
+                .GroupBy(r => r.Asset!)
+                .Select(g => new AssetPerformanceItem
+                {
+                    AssetName = g.Key.AssetName,
+                    AssetCode = g.Key.AssetCode,
+                    RepairCount = g.Count(),
+                    TotalCost = g.Sum(r => r.TotalCost),
+                    LastMaintenanceDate = g.Max(r => r.CreatedAt)
+                })
+                .OrderByDescending(a => a.RepairCount)
+                .Take(10)
                 .ToList();
 
             return View(report);

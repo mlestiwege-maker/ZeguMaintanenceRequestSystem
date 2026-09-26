@@ -57,6 +57,14 @@
                     </div>
 
                     <div class="mb-3">
+                        <label class="form-label">Asset (Optional)</label>
+                        <select asp-for="AssetId" class="form-select" id="assetSelect" disabled>
+                            <option value="">-- Select Room First --</option>
+                        </select>
+                        <small class="text-muted">If this issue relates to a specific registered item (e.g. a computer or air conditioner), select it here.</small>
+                    </div>
+
+                    <div class="mb-3">
                         <label class="form-label">Department (Optional)</label>
                         <select asp-for="DepartmentId" class="form-select">
                             <option value="">-- Select Department --</option>
@@ -139,6 +147,49 @@
                 roomSelect.disabled = true;
                 roomSelect.innerHTML = '<option value="">-- Select Room --</option>';
             }
+
+            resetAssetSelect();
+        });
+
+        function resetAssetSelect() {
+            const assetSelect = document.getElementById('assetSelect');
+            assetSelect.disabled = true;
+            assetSelect.innerHTML = '<option value="">-- Select Room First --</option>';
+        }
+
+        document.getElementById('roomSelect').addEventListener('change', function() {
+            const locationId = this.value;
+            const assetSelect = document.getElementById('assetSelect');
+
+            if (!locationId) {
+                resetAssetSelect();
+                return;
+            }
+
+            assetSelect.disabled = false;
+            assetSelect.innerHTML = '<option value="">-- None --</option>';
+
+            fetch(`/api/locations/assets?locationId=${locationId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.length === 0) {
+                        const option = document.createElement('option');
+                        option.value = "";
+                        option.textContent = "No registered assets at this location";
+                        assetSelect.appendChild(option);
+                    } else {
+                        data.forEach(asset => {
+                            const option = document.createElement('option');
+                            option.value = asset.id;
+                            option.textContent = asset.assetCode ? `${asset.assetName} (${asset.assetCode})` : asset.assetName;
+                            assetSelect.appendChild(option);
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading assets:', error);
+                    assetSelect.innerHTML = '<option value="">-- None --</option>';
+                });
         });
     </script>
 }

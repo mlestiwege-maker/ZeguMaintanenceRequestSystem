@@ -21,6 +21,7 @@ namespace ZEGU.WebApp.ViewModels.Requests
         public int? LocationId { get; set; }
 
         public int? DepartmentId { get; set; }
+        public int? AssetId { get; set; }
         public int SelectedBuildingId { get; set; }
         public RequestPriority Priority { get; set; } = RequestPriority.Normal;
         public List<MaintenanceCategory> Categories { get; set; } = new();

@@ -79,6 +79,9 @@ namespace ZEGU.WebApp.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(PreventiveMaintenanceSchedule schedule)
         {
+            ModelState.Remove(nameof(PreventiveMaintenanceSchedule.Category));
+            ModelState.Remove(nameof(PreventiveMaintenanceSchedule.Location));
+
             if (ModelState.IsValid)
             {
                 _context.PreventiveMaintenanceSchedules.Add(schedule);
@@ -112,6 +115,9 @@ namespace ZEGU.WebApp.Areas.Admin.Controllers
         public async Task<IActionResult> Edit(int id, PreventiveMaintenanceSchedule schedule)
         {
             if (id != schedule.Id) return NotFound();
+
+            ModelState.Remove(nameof(PreventiveMaintenanceSchedule.Category));
+            ModelState.Remove(nameof(PreventiveMaintenanceSchedule.Location));
 
             if (ModelState.IsValid)
             {

@@ -33,5 +33,21 @@ namespace ZEGU.WebApp.Controllers
 
             return Ok(rooms);
         }
+
+        [HttpGet("assets")]
+        public async Task<IActionResult> GetAssets([FromQuery] int locationId)
+        {
+            var assets = await _context.Assets
+                .Where(a => a.LocationId == locationId && a.IsActive)
+                .Select(a => new
+                {
+                    a.Id,
+                    a.AssetName,
+                    a.AssetCode
+                })
+                .ToListAsync();
+
+            return Ok(assets);
+        }
     }
 }

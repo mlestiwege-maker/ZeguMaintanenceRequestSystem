@@ -61,6 +61,15 @@ namespace ZEGU.WebApp.ViewModels.Admin
         public double? CompliancePercentage { get; set; }
     }
 
+    public class AssetPerformanceItem
+    {
+        public string AssetName { get; set; } = string.Empty;
+        public string? AssetCode { get; set; }
+        public int RepairCount { get; set; }
+        public decimal? TotalCost { get; set; }
+        public DateTime LastMaintenanceDate { get; set; }
+    }
+
     public class ReportsViewModel
     {
         public DateTime? StartDate { get; set; }
@@ -81,5 +90,6 @@ namespace ZEGU.WebApp.ViewModels.Admin
         public double? SlaCompliancePercentage { get; set; }
         public int CurrentlyOverdueCount { get; set; }
         public List<SlaCategoryItem> SlaByCategory { get; set; } = new();
+        public List<AssetPerformanceItem> AssetPerformance { get; set; } = new();
     }
 }

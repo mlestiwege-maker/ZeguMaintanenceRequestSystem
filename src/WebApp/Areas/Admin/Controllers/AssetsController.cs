@@ -78,6 +78,7 @@ namespace ZEGU.WebApp.Areas.Admin.Controllers
             ViewBag.Categories = new SelectList(await _context.MaintenanceCategories.Where(c => c.IsActive).ToListAsync(), "Id", "CategoryName");
             ViewBag.Locations = new SelectList(await _context.Rooms.Where(r => r.IsActive).ToListAsync(), "Id", "RoomNumber");
             ViewBag.Statuses = new SelectList(new[] { "Operational", "UnderMaintenance", "OutOfService", "Disposed" });
+            ViewBag.Conditions = new SelectList(new[] { "Excellent", "Good", "Fair", "Poor", "Critical" });
             return View();
         }
 
@@ -85,6 +86,9 @@ namespace ZEGU.WebApp.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Asset asset)
         {
+            ModelState.Remove(nameof(Asset.Category));
+            ModelState.Remove(nameof(Asset.Location));
+
             if (ModelState.IsValid)
             {
                 if (string.IsNullOrWhiteSpace(asset.AssetCode))
@@ -115,6 +119,7 @@ namespace ZEGU.WebApp.Areas.Admin.Controllers
             ViewBag.Categories = new SelectList(await _context.MaintenanceCategories.Where(c => c.IsActive).ToListAsync(), "Id", "CategoryName", asset.CategoryId);
             ViewBag.Locations = new SelectList(await _context.Rooms.Where(r => r.IsActive).ToListAsync(), "Id", "RoomNumber", asset.LocationId);
             ViewBag.Statuses = new SelectList(new[] { "Operational", "UnderMaintenance", "OutOfService", "Disposed" }, asset.Status);
+            ViewBag.Conditions = new SelectList(new[] { "Excellent", "Good", "Fair", "Poor", "Critical" }, asset.Condition);
             return View(asset);
         }
 
@@ -134,6 +139,7 @@ namespace ZEGU.WebApp.Areas.Admin.Controllers
             ViewBag.Categories = new SelectList(await _context.MaintenanceCategories.Where(c => c.IsActive).ToListAsync(), "Id", "CategoryName", asset.CategoryId);
             ViewBag.Locations = new SelectList(await _context.Rooms.Where(r => r.IsActive).ToListAsync(), "Id", "RoomNumber", asset.LocationId);
             ViewBag.Statuses = new SelectList(new[] { "Operational", "UnderMaintenance", "OutOfService", "Disposed" }, asset.Status);
+            ViewBag.Conditions = new SelectList(new[] { "Excellent", "Good", "Fair", "Poor", "Critical" }, asset.Condition);
             return View(asset);
         }
 
@@ -143,6 +149,9 @@ namespace ZEGU.WebApp.Areas.Admin.Controllers
         {
             if (id != asset.Id)
                 return NotFound();
+
+            ModelState.Remove(nameof(Asset.Category));
+            ModelState.Remove(nameof(Asset.Location));
 
             if (ModelState.IsValid)
             {
@@ -164,6 +173,7 @@ namespace ZEGU.WebApp.Areas.Admin.Controllers
             ViewBag.Categories = new SelectList(await _context.MaintenanceCategories.Where(c => c.IsActive).ToListAsync(), "Id", "CategoryName", asset.CategoryId);
             ViewBag.Locations = new SelectList(await _context.Rooms.Where(r => r.IsActive).ToListAsync(), "Id", "RoomNumber", asset.LocationId);
             ViewBag.Statuses = new SelectList(new[] { "Operational", "UnderMaintenance", "OutOfService", "Disposed" }, asset.Status);
+            ViewBag.Conditions = new SelectList(new[] { "Excellent", "Good", "Fair", "Poor", "Critical" }, asset.Condition);
             return View(asset);
         }
 

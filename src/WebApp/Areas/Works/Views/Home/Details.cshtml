@@ -57,6 +57,26 @@
                     <dt class="col-sm-3">Location</dt>
                     <dd class="col-sm-9">@Model.Location.Building!.BuildingName - Floor @Model.Location.Floor, Room @Model.Location.RoomNumber</dd>
 
+                    <dt class="col-sm-3">Asset</dt>
+                    <dd class="col-sm-9">
+                        <form method="post" asp-action="SetAsset" asp-route-requestId="@Model.Id" class="d-flex gap-2 align-items-center">
+                            @Html.AntiForgeryToken()
+                            <select name="assetId" class="form-select form-select-sm" style="max-width: 320px;" onchange="this.form.submit()">
+                                <option value="">-- No asset linked --</option>
+                                @foreach (var asset in (List<ZEGU.Core.Entities.Maintenance.Asset>)ViewBag.LocationAssets)
+                                {
+                                    <option value="@asset.Id" selected="@(Model.AssetId == asset.Id)">@asset.AssetName (@asset.AssetCode)</option>
+                                }
+                            </select>
+                            @if (Model.Asset != null)
+                            {
+                                <a asp-area="Admin" asp-controller="Assets" asp-action="Details" asp-route-id="@Model.Asset.Id" class="btn btn-sm btn-outline-info" title="View asset">
+                                    <i class="bi bi-box-seam"></i>
+                                </a>
+                            }
+                        </form>
+                    </dd>
+
                     <dt class="col-sm-3">Priority</dt>
                     <dd class="col-sm-9">
                         <span class="badge priority-@Model.Priority.ToString().ToLower()">@Model.Priority</span>

@@ -65,6 +65,15 @@
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
+                            <label class="form-label">Condition</label>
+                            <select asp-for="Condition" class="form-select" asp-items="ViewBag.Conditions">
+                                <option value="">Select Condition</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
                             <label class="form-label">Manufacturer</label>
                             <input asp-for="Manufacturer" class="form-control" placeholder="Enter manufacturer" />
                         </div>
