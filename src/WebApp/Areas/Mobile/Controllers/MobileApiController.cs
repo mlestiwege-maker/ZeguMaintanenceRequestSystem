@@ -9,6 +9,7 @@ using System.Text;
 using ZEGU.Core.Entities.Maintenance;
 using ZEGU.Core.Enums;
 using ZEGU.Infrastructure.Data;
+using ZEGU.Infrastructure.Services;
 using Microsoft.AspNetCore.Identity;
 using ZEGU.Core.Entities.Identity;
 
@@ -179,6 +180,9 @@ namespace ZEGU.WebApp.Areas.Mobile.Controllers
             var user = await _userManager.FindByIdAsync(CurrentUserId);
             if (user == null) return Unauthorized();
 
+            var category = await _context.MaintenanceCategories.FirstOrDefaultAsync(c => c.Id == request.CategoryId);
+            if (category == null) return BadRequest(new { message = "Selected category is invalid" });
+
             int? validatedAssetId = null;
             if (request.AssetId.HasValue)
             {
@@ -196,7 +200,7 @@ namespace ZEGU.WebApp.Areas.Mobile.Controllers
                 AssetId = validatedAssetId,
                 Title = request.Title,
                 Description = request.Description,
-                Priority = request.Priority,
+                Priority = RequestPriorityClassifier.Determine(category.DefaultPriority, request.Title, request.Description),
                 Status = MaintenanceRequestStatus.Submitted
             };
 
@@ -254,6 +258,5 @@ namespace ZEGU.WebApp.Areas.Mobile.Controllers
         public int? AssetId { get; set; }
         public string Title { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
-        public RequestPriority Priority { get; set; } = RequestPriority.Normal;
     }
 }

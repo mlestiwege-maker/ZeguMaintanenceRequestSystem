@@ -23,6 +23,7 @@
                         <th>Category Name</th>
                         <th class="hide-mobile">Description</th>
                         <th>SLA Hours</th>
+                        <th>Default Priority</th>
                         <th>Status</th>
                         <th>Actions</th>
                     </tr>
@@ -34,6 +35,9 @@
                             <td data-label="Category Name"><strong>@category.CategoryName</strong></td>
                             <td data-label="Description" class="hide-mobile">@category.Description</td>
                             <td data-label="SLA Hours">@category.SLAHours</td>
+                            <td data-label="Default Priority">
+                                <span class="badge priority-@category.DefaultPriority.ToString().ToLower()">@category.DefaultPriority</span>
+                            </td>
                             <td data-label="Status">
                                 @if (category.IsActive)
                                 {

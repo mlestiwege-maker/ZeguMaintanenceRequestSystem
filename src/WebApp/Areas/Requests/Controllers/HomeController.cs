@@ -175,7 +175,7 @@ namespace ZEGU.WebApp.Areas.Requests.Controllers
                 AssetId = validatedAssetId,
                 Title = model.Title,
                 Description = model.Description,
-                Priority = model.Priority,
+                Priority = RequestPriorityClassifier.Determine(category.DefaultPriority, model.Title, model.Description),
                 Status = MaintenanceRequestStatus.Submitted
             };
 

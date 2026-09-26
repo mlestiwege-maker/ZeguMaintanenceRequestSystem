@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 using ZEGU.Core.Entities.Shared;
-using ZEGU.Core.Enums;
 
 namespace ZEGU.WebApp.ViewModels.Requests
 {
@@ -23,7 +22,6 @@ namespace ZEGU.WebApp.ViewModels.Requests
         public int? DepartmentId { get; set; }
         public int? AssetId { get; set; }
         public int SelectedBuildingId { get; set; }
-        public RequestPriority Priority { get; set; } = RequestPriority.Normal;
         public List<MaintenanceCategory> Categories { get; set; } = new();
         public List<Building> Buildings { get; set; } = new();
         public List<Department> Departments { get; set; } = new();

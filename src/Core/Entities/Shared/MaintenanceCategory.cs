@@ -1,5 +1,6 @@
 using ZEGU.Core.Common;
 using ZEGU.Core.Entities.Maintenance;
+using ZEGU.Core.Enums;
 
 namespace ZEGU.Core.Entities.Shared
 {
@@ -9,6 +10,7 @@ namespace ZEGU.Core.Entities.Shared
         public string? Description { get; set; }
         public string? Icon { get; set; }
         public int? SLAHours { get; set; }
+        public RequestPriority DefaultPriority { get; set; } = RequestPriority.Normal;
         
         public ICollection<MaintenanceRequest> MaintenanceRequests { get; set; } = new List<MaintenanceRequest>();
         public ICollection<PreventiveMaintenanceSchedule> PreventiveMaintenanceSchedules { get; set; } = new List<PreventiveMaintenanceSchedule>();

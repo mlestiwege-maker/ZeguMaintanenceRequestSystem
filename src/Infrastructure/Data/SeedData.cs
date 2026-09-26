@@ -165,16 +165,16 @@ namespace ZEGU.Infrastructure.Data
             if (!context.MaintenanceCategories.Any())
             {
                 context.MaintenanceCategories.AddRange(
-                    new ZEGU.Core.Entities.Shared.MaintenanceCategory { CategoryName = "Electrical", SLAHours = 4, IsActive = true },
-                    new ZEGU.Core.Entities.Shared.MaintenanceCategory { CategoryName = "Plumbing", SLAHours = 4, IsActive = true },
-                    new ZEGU.Core.Entities.Shared.MaintenanceCategory { CategoryName = "Carpentry", SLAHours = 24, IsActive = true },
-                    new ZEGU.Core.Entities.Shared.MaintenanceCategory { CategoryName = "Painting", SLAHours = 48, IsActive = true },
-                    new ZEGU.Core.Entities.Shared.MaintenanceCategory { CategoryName = "HVAC", SLAHours = 8, IsActive = true },
-                    new ZEGU.Core.Entities.Shared.MaintenanceCategory { CategoryName = "Furniture", SLAHours = 24, IsActive = true },
-                    new ZEGU.Core.Entities.Shared.MaintenanceCategory { CategoryName = "Sanitation", SLAHours = 2, IsActive = true },
-                    new ZEGU.Core.Entities.Shared.MaintenanceCategory { CategoryName = "Grounds", SLAHours = 24, IsActive = true },
-                    new ZEGU.Core.Entities.Shared.MaintenanceCategory { CategoryName = "Generator", SLAHours = 4, IsActive = true },
-                    new ZEGU.Core.Entities.Shared.MaintenanceCategory { CategoryName = "Other", SLAHours = 24, IsActive = true }
+                    new ZEGU.Core.Entities.Shared.MaintenanceCategory { CategoryName = "Electrical", SLAHours = 4, DefaultPriority = ZEGU.Core.Enums.RequestPriority.High, IsActive = true },
+                    new ZEGU.Core.Entities.Shared.MaintenanceCategory { CategoryName = "Plumbing", SLAHours = 4, DefaultPriority = ZEGU.Core.Enums.RequestPriority.Normal, IsActive = true },
+                    new ZEGU.Core.Entities.Shared.MaintenanceCategory { CategoryName = "Carpentry", SLAHours = 24, DefaultPriority = ZEGU.Core.Enums.RequestPriority.Low, IsActive = true },
+                    new ZEGU.Core.Entities.Shared.MaintenanceCategory { CategoryName = "Painting", SLAHours = 48, DefaultPriority = ZEGU.Core.Enums.RequestPriority.Low, IsActive = true },
+                    new ZEGU.Core.Entities.Shared.MaintenanceCategory { CategoryName = "HVAC", SLAHours = 8, DefaultPriority = ZEGU.Core.Enums.RequestPriority.Normal, IsActive = true },
+                    new ZEGU.Core.Entities.Shared.MaintenanceCategory { CategoryName = "Furniture", SLAHours = 24, DefaultPriority = ZEGU.Core.Enums.RequestPriority.Low, IsActive = true },
+                    new ZEGU.Core.Entities.Shared.MaintenanceCategory { CategoryName = "Sanitation", SLAHours = 2, DefaultPriority = ZEGU.Core.Enums.RequestPriority.High, IsActive = true },
+                    new ZEGU.Core.Entities.Shared.MaintenanceCategory { CategoryName = "Grounds", SLAHours = 24, DefaultPriority = ZEGU.Core.Enums.RequestPriority.Low, IsActive = true },
+                    new ZEGU.Core.Entities.Shared.MaintenanceCategory { CategoryName = "Generator", SLAHours = 4, DefaultPriority = ZEGU.Core.Enums.RequestPriority.High, IsActive = true },
+                    new ZEGU.Core.Entities.Shared.MaintenanceCategory { CategoryName = "Other", SLAHours = 24, DefaultPriority = ZEGU.Core.Enums.RequestPriority.Normal, IsActive = true }
                 );
                 await context.SaveChangesAsync();
             }
