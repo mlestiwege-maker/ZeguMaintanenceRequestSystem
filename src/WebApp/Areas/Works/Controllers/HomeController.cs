@@ -412,6 +412,101 @@ namespace ZEGU.WebApp.Areas.Works.Controllers
             return RedirectToAction(nameof(AllRequests));
         }
 
+        [HttpPost]
+        [Authorize(Policy = "RequireManagerOrAdmin")]
+        public async Task<IActionResult> ApproveCompletion(int id)
+        {
+            var request = await _context.MaintenanceRequests.Include(r => r.User).FirstOrDefaultAsync(r => r.Id == id && r.IsActive);
+            if (request == null) return NotFound();
+
+            if (request.Status != MaintenanceRequestStatus.Completed)
+            {
+                TempData["ErrorMessage"] = "Only requests marked complete by a technician can be approved.";
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
+            var currentUserName = User.Identity?.Name;
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == currentUserName);
+            if (user == null) return RedirectToAction("Login", "Account", new { area = "" });
+
+            request.Status = MaintenanceRequestStatus.Verified;
+            request.UpdatedAt = DateTime.UtcNow;
+
+            _context.RequestStatusHistory.Add(new RequestStatusHistory
+            {
+                RequestId = id,
+                OldStatus = MaintenanceRequestStatus.Completed,
+                NewStatus = MaintenanceRequestStatus.Verified,
+                ChangedById = user.Id,
+                Comments = "Approved and verified by manager"
+            });
+
+            await _context.SaveChangesAsync();
+
+            await _auditService.LogAsync(user.Id, user.UserName, "ApproveCompletion", "MaintenanceRequest",
+                entityId: request.Id, newValues: new { Status = MaintenanceRequestStatus.Verified },
+                ipAddress: HttpContext.Connection.RemoteIpAddress?.ToString());
+
+            await _notificationService.CreateNotificationAsync(request.UserId,
+                "Request Verified", $"Your request {request.RequestNumber} has been reviewed and verified as complete.", request.Id);
+
+            await NotifyAssignedTechnicianAsync(request, $"Your completed work on request {request.RequestNumber} has been approved and verified. Thank you!");
+
+            await SendRequesterStatusEmailAsync(request, "RequestStatusUpdated",
+                $"Your request {request.RequestNumber} has been reviewed and verified as complete.");
+
+            TempData["SuccessMessage"] = "Request approved and verified.";
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
+        [HttpPost]
+        [Authorize(Policy = "RequireManagerOrAdmin")]
+        public async Task<IActionResult> SendBackForRework(int id, string reason)
+        {
+            var request = await _context.MaintenanceRequests.FirstOrDefaultAsync(r => r.Id == id && r.IsActive);
+            if (request == null) return NotFound();
+
+            if (request.Status != MaintenanceRequestStatus.Completed)
+            {
+                TempData["ErrorMessage"] = "Only requests marked complete by a technician can be sent back.";
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
+            if (string.IsNullOrWhiteSpace(reason))
+            {
+                TempData["ErrorMessage"] = "Please provide a reason so the technician knows what needs fixing.";
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
+            var currentUserName = User.Identity?.Name;
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == currentUserName);
+            if (user == null) return RedirectToAction("Login", "Account", new { area = "" });
+
+            request.Status = MaintenanceRequestStatus.InProgress;
+            request.CompletedAt = null;
+            request.UpdatedAt = DateTime.UtcNow;
+
+            _context.RequestStatusHistory.Add(new RequestStatusHistory
+            {
+                RequestId = id,
+                OldStatus = MaintenanceRequestStatus.Completed,
+                NewStatus = MaintenanceRequestStatus.InProgress,
+                ChangedById = user.Id,
+                Comments = $"Sent back for rework by manager: {reason}"
+            });
+
+            await _context.SaveChangesAsync();
+
+            await _auditService.LogAsync(user.Id, user.UserName, "SendBackForRework", "MaintenanceRequest",
+                entityId: request.Id, newValues: new { Status = MaintenanceRequestStatus.InProgress, reason },
+                ipAddress: HttpContext.Connection.RemoteIpAddress?.ToString());
+
+            await NotifyAssignedTechnicianAsync(request, $"Request {request.RequestNumber} was sent back for more work: {reason}");
+
+            TempData["SuccessMessage"] = "Sent back to the technician for more work.";
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
         [HttpGet]
         public async Task<IActionResult> Reject(int id)
         {
@@ -481,6 +576,8 @@ namespace ZEGU.WebApp.Areas.Works.Controllers
                 .Include(r => r.Attachments)
                 .Include(r => r.Assignments)
                 .ThenInclude(a => a.Technician)
+                .Include(r => r.MaterialRequests)
+                .ThenInclude(m => m.Material)
                 .FirstOrDefaultAsync(r => r.Id == id && r.IsActive);
 
             if (request == null) return NotFound();

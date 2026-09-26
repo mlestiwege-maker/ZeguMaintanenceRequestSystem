@@ -53,6 +53,7 @@ namespace ZEGU.Core.Entities.Maintenance
         public ICollection<RequestAttachment> Attachments { get; set; } = new List<RequestAttachment>();
         public ICollection<Assignment> Assignments { get; set; } = new List<Assignment>();
         public ICollection<WorkLog> WorkLogs { get; set; } = new List<WorkLog>();
+        public ICollection<MaterialRequest> MaterialRequests { get; set; } = new List<MaterialRequest>();
         public Feedback? Feedback { get; set; }
     }
 }

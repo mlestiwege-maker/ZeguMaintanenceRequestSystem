@@ -79,4 +79,11 @@ namespace ZEGU.Core.Enums
         System = 3,
         WhatsApp = 4
     }
+
+    public enum MaterialRequestStatus
+    {
+        Pending = 1,
+        Approved = 2,
+        Rejected = 3
+    }
 }

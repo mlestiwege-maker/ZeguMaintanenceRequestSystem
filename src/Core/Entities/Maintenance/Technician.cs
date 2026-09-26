@@ -16,5 +16,6 @@ namespace ZEGU.Core.Entities.Maintenance
         
         public ICollection<Assignment> Assignments { get; set; } = new List<Assignment>();
         public ICollection<WorkLog> WorkLogs { get; set; } = new List<WorkLog>();
+        public ICollection<MaterialRequest> MaterialRequests { get; set; } = new List<MaterialRequest>();
     }
 }

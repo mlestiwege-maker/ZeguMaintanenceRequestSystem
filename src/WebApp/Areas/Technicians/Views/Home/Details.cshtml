@@ -80,6 +80,80 @@
             </div>
         }
 
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5><i class="bi bi-box-seam"></i> Materials Needed</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.MaterialRequests.Any())
+                {
+                    <div class="table-responsive mb-3">
+                        <table class="table table-sm table-mobile-cards">
+                            <thead>
+                                <tr>
+                                    <th>Material</th>
+                                    <th>Qty</th>
+                                    <th>Status</th>
+                                    <th class="hide-mobile">Notes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var mr in Model.MaterialRequests.OrderByDescending(m => m.CreatedAt))
+                                {
+                                    var statusClass = mr.Status switch
+                                    {
+                                        ZEGU.Core.Enums.MaterialRequestStatus.Approved => "bg-success",
+                                        ZEGU.Core.Enums.MaterialRequestStatus.Rejected => "bg-danger",
+                                        _ => "bg-warning text-dark"
+                                    };
+                                    <tr>
+                                        <td data-label="Material">@mr.Material.MaterialName</td>
+                                        <td data-label="Qty">@mr.QuantityRequested @mr.Material.Unit</td>
+                                        <td data-label="Status"><span class="badge @statusClass">@mr.Status</span></td>
+                                        <td data-label="Notes" class="hide-mobile">
+                                            @mr.Notes
+                                            @if (!string.IsNullOrEmpty(mr.ReviewNotes))
+                                            {
+                                                <br /><small class="text-muted">Review: @mr.ReviewNotes</small>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted">No materials requested yet.</p>
+                }
+
+                <form method="post" asp-action="RequestMaterial" class="row g-2 align-items-end">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="requestId" value="@Model.Id" />
+                    <div class="col-md-5">
+                        <label class="form-label small">Material</label>
+                        <select name="materialId" class="form-select form-select-sm" asp-items="ViewBag.Materials" required>
+                            <option value="">-- Select Material --</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small">Quantity</label>
+                        <input type="number" name="quantity" class="form-control form-control-sm" step="0.01" min="0.01" required />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small">Notes (optional)</label>
+                        <input type="text" name="notes" class="form-control form-control-sm" />
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-sm btn-primary w-100">
+                            <i class="bi bi-plus-circle"></i> Request
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <div class="card">
             <div class="card-header">
                 <h5><i class="bi bi-chat"></i> Comments</h5>
@@ -108,6 +182,29 @@
     </div>
 
     <div class="col-md-4">
+        @if (ViewBag.CanMarkComplete)
+        {
+            <div class="card mb-3 border-success">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-check2-circle"></i> Mark as Complete</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted small">Marking this complete does not close the request - a Works Officer or Manager will review your work and give the final approval.</p>
+                    <form method="post" asp-action="MarkComplete">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="requestId" value="@Model.Id" />
+                        <div class="mb-2">
+                            <label class="form-label small">Work Performed</label>
+                            <textarea name="workPerformed" class="form-control form-control-sm" rows="3" placeholder="Describe what you did to fix this..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-success btn-sm w-100">
+                            <i class="bi bi-check2-circle"></i> Mark Complete
+                        </button>
+                    </form>
+                </div>
+            </div>
+        }
+
         @if (Model.StatusHistory.Any())
         {
             <div class="card">

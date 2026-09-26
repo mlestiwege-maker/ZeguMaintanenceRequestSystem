@@ -13,5 +13,6 @@ namespace ZEGU.Core.Entities.Maintenance
         public int CurrentStock { get; set; } = 0;
         
         public ICollection<MaterialUsage> MaterialUsage { get; set; } = new List<MaterialUsage>();
+        public ICollection<MaterialRequest> MaterialRequests { get; set; } = new List<MaterialRequest>();
     }
 }

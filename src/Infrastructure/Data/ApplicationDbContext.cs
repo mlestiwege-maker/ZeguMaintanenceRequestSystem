@@ -29,6 +29,7 @@ namespace ZEGU.Infrastructure.Data
         public DbSet<WorkLog> WorkLogs { get; set; }
         public DbSet<Material> Materials { get; set; }
         public DbSet<MaterialUsage> MaterialUsage { get; set; }
+        public DbSet<MaterialRequest> MaterialRequests { get; set; }
         public DbSet<Feedback> Feedbacks { get; set; }
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<Ticket> Tickets { get; set; }
@@ -196,6 +197,30 @@ namespace ZEGU.Infrastructure.Data
                 .HasMany(m => m.MaterialUsage)
                 .WithOne(m => m.Material)
                 .HasForeignKey(m => m.MaterialId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<MaintenanceRequest>()
+                .HasMany(r => r.MaterialRequests)
+                .WithOne(mr => mr.Request)
+                .HasForeignKey(mr => mr.RequestId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<Technician>()
+                .HasMany(t => t.MaterialRequests)
+                .WithOne(mr => mr.Technician)
+                .HasForeignKey(mr => mr.TechnicianId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<Material>()
+                .HasMany(m => m.MaterialRequests)
+                .WithOne(mr => mr.Material)
+                .HasForeignKey(mr => mr.MaterialId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<MaterialRequest>()
+                .HasOne(mr => mr.ReviewedBy)
+                .WithMany()
+                .HasForeignKey(mr => mr.ReviewedById)
                 .OnDelete(DeleteBehavior.Restrict);
 
             builder.Entity<MaintenanceRequest>()

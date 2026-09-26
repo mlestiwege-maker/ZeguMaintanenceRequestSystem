@@ -34,6 +34,41 @@
     </div>
 </div>
 
+@if (Model.Status == ZEGU.Core.Enums.MaintenanceRequestStatus.Completed && (User.IsInRole(nameof(ZEGU.Core.Enums.UserRole.Manager)) || User.IsInRole(nameof(ZEGU.Core.Enums.UserRole.Admin))))
+{
+    <div class="card mb-3 border-success">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0"><i class="bi bi-check2-circle"></i> Awaiting Your Final Approval</h5>
+        </div>
+        <div class="card-body">
+            <p class="text-muted">The assigned technician has marked this request complete. Review the work below and give the final decision.</p>
+            <div class="d-flex flex-wrap gap-2">
+                <form method="post" asp-action="ApproveCompletion" asp-route-id="@Model.Id" style="display:inline;">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-check-lg"></i> Approve &amp; Verify
+                    </button>
+                </form>
+                <button type="button" class="btn btn-outline-danger" data-bs-toggle="collapse" data-bs-target="#sendBackForm">
+                    <i class="bi bi-arrow-counterclockwise"></i> Send Back for Rework
+                </button>
+            </div>
+            <div class="collapse mt-3" id="sendBackForm">
+                <form method="post" asp-action="SendBackForRework" asp-route-id="@Model.Id">
+                    @Html.AntiForgeryToken()
+                    <div class="mb-2">
+                        <label class="form-label small">Reason (visible to the technician)</label>
+                        <textarea name="reason" class="form-control form-control-sm" rows="2" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-danger btn-sm">
+                        <i class="bi bi-arrow-counterclockwise"></i> Send Back
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+
 <div class="row">
     <div class="col-md-8">
         <div class="card mb-3">
@@ -183,6 +218,39 @@
                         <span>Total:</span>
                         <strong class="text-primary fs-5">@((Model.TotalCost ?? 0).ToString("C"))</strong>
                     </div>
+                </div>
+            </div>
+        }
+
+        @if (Model.MaterialRequests.Any())
+        {
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5><i class="bi bi-box-seam"></i> Materials Requested</h5>
+                </div>
+                <div class="card-body">
+                    @foreach (var mr in Model.MaterialRequests.OrderByDescending(m => m.CreatedAt))
+                    {
+                        var statusClass = mr.Status switch
+                        {
+                            ZEGU.Core.Enums.MaterialRequestStatus.Approved => "bg-success",
+                            ZEGU.Core.Enums.MaterialRequestStatus.Rejected => "bg-danger",
+                            _ => "bg-warning text-dark"
+                        };
+                        <div class="d-flex justify-content-between align-items-start mb-2 pb-2 border-bottom">
+                            <div>
+                                <strong>@mr.Material.MaterialName</strong> - @mr.QuantityRequested @mr.Material.Unit
+                                @if (!string.IsNullOrEmpty(mr.Notes))
+                                {
+                                    <br /><small class="text-muted">@mr.Notes</small>
+                                }
+                            </div>
+                            <span class="badge @statusClass">@mr.Status</span>
+                        </div>
+                    }
+                    <a asp-controller="MaterialRequests" asp-action="Index" class="btn btn-sm btn-outline-primary mt-2">
+                        <i class="bi bi-box-seam"></i> Review Material Requests
+                    </a>
                 </div>
             </div>
         }
