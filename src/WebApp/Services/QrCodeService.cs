@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using QRCoder;
 
 namespace ZEGU.WebApp.Services
 {
@@ -16,17 +17,17 @@ namespace ZEGU.WebApp.Services
 
         public byte[] GenerateQrCode(string content, int size = 300)
         {
-            var baseUrl = _configuration["QrCodeApiUrl"] ?? "https://api.qrserver.com/v1/create-qr-code/";
-            var url = $"{baseUrl}?size={size}x{size}&data={Uri.EscapeDataString(content)}";
-            
-            using var client = new HttpClient();
-            return client.GetByteArrayAsync(url).GetAwaiter().GetResult();
+            using var qrGenerator = new QRCodeGenerator();
+            using var qrCodeData = qrGenerator.CreateQrCode(content, QRCodeGenerator.ECCLevel.Q);
+            var qrCode = new PngByteQRCode(qrCodeData);
+            var pixelsPerModule = Math.Max(1, size / 40);
+            return qrCode.GetGraphic(pixelsPerModule);
         }
 
         public string GenerateAssetQrCode(int assetId, string assetCode)
         {
             var baseUrl = _configuration["AppUrl"] ?? "https://localhost:5259";
-            return $"{baseUrl}/Mobile/ScanAsset/{assetId}";
+            return $"{baseUrl}/Mobile/Scan/{assetId}";
         }
 
         public async Task<string> SaveQrCodeAsync(int assetId, string assetCode)

@@ -36,7 +36,6 @@ namespace ZEGU.WebApp.Areas.Admin.Controllers
                 CategorySlaHours = categorySla,
                 MaxFileSize = _configuration.GetValue<int>("Uploads:MaxFileSize", 5),
                 AppUrl = _configuration["AppUrl"] ?? "http://localhost:5259",
-                QrCodeApiUrl = _configuration["QrCodeApiUrl"] ?? "https://api.qrserver.com/v1/create-qr-code/",
                 TotalUsers = await _context.Users.CountAsync(),
                 TotalRequests = await _context.MaintenanceRequests.CountAsync(),
                 TotalCategories = await _context.MaintenanceCategories.CountAsync(),

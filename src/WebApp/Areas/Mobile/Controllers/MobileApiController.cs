@@ -179,6 +179,13 @@ namespace ZEGU.WebApp.Areas.Mobile.Controllers
             var user = await _userManager.FindByIdAsync(CurrentUserId);
             if (user == null) return Unauthorized();
 
+            int? validatedAssetId = null;
+            if (request.AssetId.HasValue)
+            {
+                var asset = await _context.Assets.FirstOrDefaultAsync(a => a.Id == request.AssetId.Value && a.IsActive && a.LocationId == request.LocationId);
+                if (asset != null) validatedAssetId = asset.Id;
+            }
+
             var requestNumber = $"MRS-{DateTime.UtcNow.Year}-TEMP";
             var maintenanceRequest = new MaintenanceRequest
             {
@@ -186,6 +193,7 @@ namespace ZEGU.WebApp.Areas.Mobile.Controllers
                 UserId = user.Id,
                 CategoryId = request.CategoryId,
                 LocationId = request.LocationId,
+                AssetId = validatedAssetId,
                 Title = request.Title,
                 Description = request.Description,
                 Priority = request.Priority,
@@ -221,9 +229,12 @@ namespace ZEGU.WebApp.Areas.Mobile.Controllers
                 asset.Manufacturer,
                 asset.Model,
                 asset.Status,
+                asset.Condition,
                 CategoryName = asset.Category.CategoryName,
+                CategoryId = asset.CategoryId,
                 BuildingName = asset.Location.Building!.BuildingName,
                 RoomNumber = asset.Location.RoomNumber,
+                LocationId = asset.LocationId,
                 asset.PurchaseDate,
                 asset.WarrantyExpiry
             });
@@ -240,6 +251,7 @@ namespace ZEGU.WebApp.Areas.Mobile.Controllers
     {
         public int CategoryId { get; set; }
         public int LocationId { get; set; }
+        public int? AssetId { get; set; }
         public string Title { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public RequestPriority Priority { get; set; } = RequestPriority.Normal;

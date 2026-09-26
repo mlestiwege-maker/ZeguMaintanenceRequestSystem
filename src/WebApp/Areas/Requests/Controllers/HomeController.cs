@@ -58,7 +58,7 @@ namespace ZEGU.WebApp.Areas.Requests.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Create()
+        public async Task<IActionResult> Create(int? assetId = null)
         {
             var model = new CreateRequestViewModel
             {
@@ -66,6 +66,23 @@ namespace ZEGU.WebApp.Areas.Requests.Controllers
                 Buildings = await _context.Buildings.Include(b => b.Campus).Where(b => b.IsActive).ToListAsync(),
                 Departments = await _context.Departments.Where(d => d.IsActive).ToListAsync()
             };
+
+            if (assetId.HasValue)
+            {
+                var asset = await _context.Assets
+                    .Include(a => a.Location)
+                    .FirstOrDefaultAsync(a => a.Id == assetId.Value && a.IsActive);
+
+                if (asset != null)
+                {
+                    model.AssetId = asset.Id;
+                    model.LocationId = asset.LocationId;
+                    model.CategoryId = asset.CategoryId;
+                    model.SelectedBuildingId = asset.Location.BuildingId;
+                    model.Title = $"Issue with {asset.AssetName}";
+                }
+            }
+
             return View(model);
         }
 

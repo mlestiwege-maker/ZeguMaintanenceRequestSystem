@@ -1,0 +1,113 @@
+@model ZEGU.Core.Entities.Maintenance.Asset
+@{
+    ViewData["Title"] = $"Asset {Model.AssetCode}";
+    var history = (List<ZEGU.Core.Entities.Maintenance.MaintenanceRequest>)ViewBag.RecentHistory;
+    var conditionClass = Model.Condition switch
+    {
+        "Excellent" or "Good" => "bg-success",
+        "Fair" => "bg-warning text-dark",
+        "Poor" or "Critical" => "bg-danger",
+        _ => "bg-secondary"
+    };
+}
+
+<div class="page-header">
+    <div>
+        <h2><i class="bi bi-qr-code-scan"></i> @Model.AssetName</h2>
+        <p class="page-subtitle">@Model.AssetCode</p>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card mb-3">
+            <div class="card-header">
+                <i class="bi bi-box-seam"></i> Asset Information
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Category</dt>
+                    <dd class="col-sm-8">@Model.Category.CategoryName</dd>
+
+                    <dt class="col-sm-4">Location</dt>
+                    <dd class="col-sm-8">@Model.Location.Building!.BuildingName - @Model.Location.RoomNumber</dd>
+
+                    <dt class="col-sm-4">Status</dt>
+                    <dd class="col-sm-8"><span class="badge status-@Model.Status?.Replace(" ", "").ToLower()">@Model.Status</span></dd>
+
+                    <dt class="col-sm-4">Condition</dt>
+                    <dd class="col-sm-8">
+                        @if (!string.IsNullOrEmpty(Model.Condition))
+                        {
+                            <span class="badge @conditionClass">@Model.Condition</span>
+                        }
+                        else
+                        {
+                            <span class="text-muted">Not set</span>
+                        }
+                    </dd>
+
+                    @if (!string.IsNullOrEmpty(Model.SerialNumber))
+                    {
+                        <dt class="col-sm-4">Serial Number</dt>
+                        <dd class="col-sm-8">@Model.SerialNumber</dd>
+                    }
+
+                    @if (history.Any())
+                    {
+                        <dt class="col-sm-4">Last Maintenance</dt>
+                        <dd class="col-sm-8">@history.First().CreatedAt.ToString("dd MMM yyyy")</dd>
+                    }
+                </dl>
+            </div>
+        </div>
+
+        <div class="d-grid gap-2 d-md-flex mb-3">
+            <a asp-area="Requests" asp-controller="Home" asp-action="Create" asp-route-assetId="@Model.Id" class="btn btn-primary">
+                <i class="bi bi-exclamation-circle"></i> Report Problem
+            </a>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-clock-history"></i> Recent Maintenance History
+            </div>
+            <div class="card-body">
+                @if (history.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-sm table-mobile-cards">
+                            <thead>
+                                <tr>
+                                    <th>Request #</th>
+                                    <th>Title</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var request in history)
+                                {
+                                    <tr>
+                                        <td data-label="Request #">@request.RequestNumber</td>
+                                        <td data-label="Title">@request.Title</td>
+                                        <td data-label="Status"><span class="badge status-@request.Status.ToString().ToLower()">@request.Status</span></td>
+                                        <td data-label="Date">@request.CreatedAt.ToString("dd MMM yyyy")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="empty-state">
+                        <i class="bi bi-clipboard-check"></i>
+                        <h4>No maintenance history</h4>
+                        <p>This asset has no maintenance requests yet.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

@@ -6,7 +6,6 @@ namespace ZEGU.WebApp.ViewModels.Admin
         public List<CategorySlaSummary> CategorySlaHours { get; set; } = new();
         public int MaxFileSize { get; set; }
         public string AppUrl { get; set; } = string.Empty;
-        public string QrCodeApiUrl { get; set; } = string.Empty;
         public int TotalUsers { get; set; }
         public int TotalRequests { get; set; }
         public int TotalCategories { get; set; }
