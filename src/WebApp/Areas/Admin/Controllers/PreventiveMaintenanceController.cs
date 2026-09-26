@@ -70,7 +70,7 @@ namespace ZEGU.WebApp.Areas.Admin.Controllers
         {
             ViewBag.Categories = new SelectList(await _context.MaintenanceCategories.Where(c => c.IsActive).ToListAsync(), "Id", "CategoryName");
             ViewBag.Locations = new SelectList(await _context.Rooms.Include(r => r.Building).Where(r => r.IsActive).ToListAsync(), "Id", "RoomNumber");
-            ViewBag.Technicians = new SelectList(await _context.Technicians.Include(t => t.User).Where(t => t.IsActive).ToListAsync(), "Id", "User.FirstName");
+            ViewBag.Technicians = await BuildTechnicianSelectListAsync(null);
             ViewBag.Frequencies = new SelectList(new[] { "Daily", "Weekly", "BiWeekly", "Monthly", "Quarterly", "SemiAnnually", "Annually" });
             return View();
         }
@@ -94,7 +94,7 @@ namespace ZEGU.WebApp.Areas.Admin.Controllers
 
             ViewBag.Categories = new SelectList(await _context.MaintenanceCategories.Where(c => c.IsActive).ToListAsync(), "Id", "CategoryName", schedule.CategoryId);
             ViewBag.Locations = new SelectList(await _context.Rooms.Where(r => r.IsActive).ToListAsync(), "Id", "RoomNumber", schedule.LocationId);
-            ViewBag.Technicians = new SelectList(await _context.Technicians.Where(t => t.IsActive).ToListAsync(), "Id", "User.FirstName", schedule.TechnicianId);
+            ViewBag.Technicians = await BuildTechnicianSelectListAsync(schedule.TechnicianId);
             ViewBag.Frequencies = new SelectList(new[] { "Daily", "Weekly", "BiWeekly", "Monthly", "Quarterly", "SemiAnnually", "Annually" }, schedule.Frequency);
             return View(schedule);
         }
@@ -107,7 +107,7 @@ namespace ZEGU.WebApp.Areas.Admin.Controllers
 
             ViewBag.Categories = new SelectList(await _context.MaintenanceCategories.Where(c => c.IsActive).ToListAsync(), "Id", "CategoryName", schedule.CategoryId);
             ViewBag.Locations = new SelectList(await _context.Rooms.Where(r => r.IsActive).ToListAsync(), "Id", "RoomNumber", schedule.LocationId);
-            ViewBag.Technicians = new SelectList(await _context.Technicians.Where(t => t.IsActive).ToListAsync(), "Id", "User.FirstName", schedule.TechnicianId);
+            ViewBag.Technicians = await BuildTechnicianSelectListAsync(schedule.TechnicianId);
             ViewBag.Frequencies = new SelectList(new[] { "Daily", "Weekly", "BiWeekly", "Monthly", "Quarterly", "SemiAnnually", "Annually" }, schedule.Frequency);
             return View(schedule);
         }
@@ -134,7 +134,7 @@ namespace ZEGU.WebApp.Areas.Admin.Controllers
 
             ViewBag.Categories = new SelectList(await _context.MaintenanceCategories.Where(c => c.IsActive).ToListAsync(), "Id", "CategoryName", schedule.CategoryId);
             ViewBag.Locations = new SelectList(await _context.Rooms.Where(r => r.IsActive).ToListAsync(), "Id", "RoomNumber", schedule.LocationId);
-            ViewBag.Technicians = new SelectList(await _context.Technicians.Where(t => t.IsActive).ToListAsync(), "Id", "User.FirstName", schedule.TechnicianId);
+            ViewBag.Technicians = await BuildTechnicianSelectListAsync(schedule.TechnicianId);
             ViewBag.Frequencies = new SelectList(new[] { "Daily", "Weekly", "BiWeekly", "Monthly", "Quarterly", "SemiAnnually", "Annually" }, schedule.Frequency);
             return View(schedule);
         }
@@ -201,6 +201,22 @@ namespace ZEGU.WebApp.Areas.Admin.Controllers
                 ? $"Sent {events.Count} reminder(s) for due/overdue schedules."
                 : "No schedules are due or overdue right now.";
             return RedirectToAction(nameof(Index));
+        }
+
+        private async Task<SelectList> BuildTechnicianSelectListAsync(int? selectedId)
+        {
+            var technicians = await _context.Technicians
+                .Include(t => t.User)
+                .Where(t => t.IsActive)
+                .Select(t => new
+                {
+                    t.Id,
+                    Display = t.TechnicianType + " - " + (t.User != null ? t.User.FirstName + " " + t.User.LastName : "No User") +
+                               (t.User != null ? " (" + t.User.Email + ")" : "")
+                })
+                .ToListAsync();
+
+            return new SelectList(technicians, "Id", "Display", selectedId);
         }
     }
 }

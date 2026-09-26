@@ -34,7 +34,7 @@
                             <option value="">-- Select Technician --</option>
                             @foreach (var tech in ViewBag.Technicians)
                             {
-                                <option value="@tech.Id">@tech.TechnicianType - @(tech.User?.FirstName ?? "No User") @(tech.User?.LastName ?? "")</option>
+                                <option value="@tech.Id">@tech.TechnicianType - @(tech.User?.FirstName ?? "No User") @(tech.User?.LastName ?? "") @(tech.User?.Email != null ? $"({tech.User.Email})" : "")</option>
                             }
                         </select>
                     </div>
