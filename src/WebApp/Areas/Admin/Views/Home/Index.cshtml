@@ -149,9 +149,16 @@
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5><i class="bi bi-clock-history"></i> Recent Requests</h5>
-                <a asp-area="Works" asp-controller="Home" asp-action="AllRequests" class="btn btn-primary btn-sm">View All Requests</a>
+                <a asp-action="AllRequests" class="btn btn-primary btn-sm">View All Requests</a>
             </div>
             <div class="card-body">
+                <form asp-action="AllRequests" method="get" class="mb-3">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                        <input type="text" name="search" class="form-control" placeholder="Search all requests by number, title, description, or requester..." />
+                        <button type="submit" class="btn btn-primary">Search</button>
+                    </div>
+                </form>
                 @if (Model.RecentRequests.Any())
                 {
                     <div class="table-responsive">
