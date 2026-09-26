@@ -94,6 +94,9 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("RequireWorksOfficer", policy =>
         policy.RequireRole("WorksOfficer"));
 
+    options.AddPolicy("RequireTechnician", policy =>
+        policy.RequireRole("Technician"));
+
     options.AddPolicy("RequireWorksAccess", policy =>
         policy.RequireRole("WorksOfficer", "Manager", "Admin"));
 

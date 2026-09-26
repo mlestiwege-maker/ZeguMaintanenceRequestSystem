@@ -261,10 +261,24 @@ namespace ZEGU.WebApp.Areas.Works.Controllers
                 var techUser = await _context.Users.FindAsync(technician.UserId);
                 if (techUser != null)
                 {
-                    await _notificationService.CreateNotificationAsync(techUser.Id, 
-                        "New Assignment", 
-                        $"You have been assigned to request {request.RequestNumber}: {request.Title}", 
+                    await _notificationService.CreateNotificationAsync(techUser.Id,
+                        "New Assignment",
+                        $"You have been assigned to request {request.RequestNumber}: {request.Title}",
                         request.Id);
+
+                    if (!string.IsNullOrEmpty(techUser.Email))
+                    {
+                        var subject = $"New assignment: {request.RequestNumber}";
+                        var body = $"<p>Hi {techUser.FirstName},</p><p>You have been assigned to request <strong>{request.RequestNumber}</strong>: {request.Title}.</p>" +
+                                   (string.IsNullOrEmpty(notes) ? "" : $"<p>Notes: {notes}</p>");
+                        _ = _emailService.SendEmailAsync(techUser.Email, subject, body, isHtml: true);
+                    }
+
+                    if (!string.IsNullOrEmpty(techUser.PhoneNumber))
+                    {
+                        _ = _smsService.SendMaintenanceNotificationAsync(techUser.PhoneNumber, techUser.FirstName, request.RequestNumber, "Assigned to you");
+                        _ = _whatsAppService.SendMaintenanceNotificationAsync(techUser.PhoneNumber, techUser.FirstName, request.RequestNumber, "Assigned to you");
+                    }
                 }
             }
 
@@ -387,6 +401,8 @@ namespace ZEGU.WebApp.Areas.Works.Controllers
                 "Request Status Updated",
                 $"Your request {request.RequestNumber} status has been changed to {newStatus}",
                 request.Id);
+
+            await NotifyAssignedTechnicianAsync(request, $"Request {request.RequestNumber} status changed to {newStatus}.");
 
             await SendRequesterStatusEmailAsync(request, "RequestStatusUpdated",
                 $"Your request {request.RequestNumber} status has been changed to <strong>{newStatus}</strong>." +
@@ -561,6 +577,8 @@ namespace ZEGU.WebApp.Areas.Works.Controllers
                     _ = _smsService.SendSmsAsync(request.User.PhoneNumber, smsBody);
                     _ = _whatsAppService.SendWhatsAppAsync(request.User.PhoneNumber, smsBody);
                 }
+
+                await NotifyAssignedTechnicianAsync(request, $"New reply on request {request.RequestNumber}: {commentText}");
             }
 
             TempData["SuccessMessage"] = "Reply added successfully";
@@ -628,11 +646,34 @@ namespace ZEGU.WebApp.Areas.Works.Controllers
 
             await _notificationService.CreateNotificationAsync(request.UserId,
                 "Request Priority Updated",
-                $"Your request {request.RequestNumber} priority has been changed to {newPriority}", 
+                $"Your request {request.RequestNumber} priority has been changed to {newPriority}",
                 request.Id);
+
+            await NotifyAssignedTechnicianAsync(request, $"Request {request.RequestNumber} priority changed to {newPriority}.");
 
             TempData["SuccessMessage"] = "Request priority updated successfully!";
             return RedirectToAction(nameof(AllRequests));
+        }
+
+        private async Task NotifyAssignedTechnicianAsync(MaintenanceRequest request, string message)
+        {
+            var activeAssignment = await _context.Assignments
+                .Include(a => a.Technician)
+                .ThenInclude(t => t.User)
+                .Where(a => a.IsActive && a.RequestId == request.Id)
+                .OrderByDescending(a => a.CreatedAt)
+                .FirstOrDefaultAsync();
+
+            var techUser = activeAssignment?.Technician.User;
+            if (techUser == null) return;
+
+            await _notificationService.CreateNotificationAsync(techUser.Id, "Update on Your Assignment", message, request.Id);
+
+            if (!string.IsNullOrEmpty(techUser.PhoneNumber))
+            {
+                _ = _smsService.SendSmsAsync(techUser.PhoneNumber, message);
+                _ = _whatsAppService.SendWhatsAppAsync(techUser.PhoneNumber, message);
+            }
         }
 
         private async Task SendRequesterStatusEmailAsync(MaintenanceRequest request, string templateName, string fallbackHtmlMessage)

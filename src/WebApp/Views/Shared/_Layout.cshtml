@@ -50,6 +50,15 @@
                             </a>
                         </li>
                     }
+                    @if (User.IsInRole(nameof(UserRole.Technician)))
+                    {
+                        <li class="nav-section">My Work</li>
+                        <li class="nav-item">
+                            <a class="nav-link @(ViewContext.RouteData.Values["area"]?.ToString() == "Technicians" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")" asp-area="Technicians" asp-controller="Home" asp-action="Index" onclick="closeSidebar()">
+                                <i class="bi bi-speedometer2"></i> Dashboard
+                            </a>
+                        </li>
+                    }
                     @if (User.IsInRole(nameof(UserRole.WorksOfficer)) || User.IsInRole(nameof(UserRole.Manager)) || User.IsInRole(nameof(UserRole.Admin)))
                     {
                         <li class="nav-section">Works</li>

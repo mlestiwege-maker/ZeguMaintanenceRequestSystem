@@ -33,6 +33,10 @@ namespace ZEGU.WebApp.Controllers
                     {
                         return RedirectToAction("Index", "Home", new { area = "Works" });
                     }
+                    else if (user.Role == UserRole.Technician)
+                    {
+                        return RedirectToAction("Index", "Home", new { area = "Technicians" });
+                    }
                     else if (user.Role == UserRole.Admin)
                     {
                         return RedirectToAction("Index", "Home", new { area = "Admin" });

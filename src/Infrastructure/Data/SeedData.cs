@@ -242,7 +242,7 @@ namespace ZEGU.Infrastructure.Data
                 }
             }
 
-            if (!context.Technicians.Any() && technicianUser != null)
+            if (technicianUser != null && !await context.Technicians.AnyAsync(t => t.UserId == technicianUser.Id))
             {
                 context.Technicians.Add(new Technician
                 {
