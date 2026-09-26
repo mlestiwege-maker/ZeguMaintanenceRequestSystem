@@ -91,6 +91,8 @@ namespace ZEGU.WebApp.Areas.Admin.Controllers
 
             if (ModelState.IsValid)
             {
+                NormalizeDateKinds(asset);
+
                 if (string.IsNullOrWhiteSpace(asset.AssetCode))
                 {
                     asset.AssetCode = GenerateAssetCode();
@@ -130,6 +132,14 @@ namespace ZEGU.WebApp.Areas.Admin.Controllers
             return $"AST-{nextId:D4}";
         }
 
+        private static void NormalizeDateKinds(Asset asset)
+        {
+            if (asset.PurchaseDate.HasValue)
+                asset.PurchaseDate = DateTime.SpecifyKind(asset.PurchaseDate.Value, DateTimeKind.Utc);
+            if (asset.WarrantyExpiry.HasValue)
+                asset.WarrantyExpiry = DateTime.SpecifyKind(asset.WarrantyExpiry.Value, DateTimeKind.Utc);
+        }
+
         public async Task<IActionResult> Edit(int id)
         {
             var asset = await _context.Assets.FindAsync(id);
@@ -155,6 +165,9 @@ namespace ZEGU.WebApp.Areas.Admin.Controllers
 
             if (ModelState.IsValid)
             {
+                NormalizeDateKinds(asset);
+                asset.CreatedAt = DateTime.SpecifyKind(asset.CreatedAt, DateTimeKind.Utc);
+
                 try
                 {
                     _context.Update(asset);

@@ -84,6 +84,8 @@ namespace ZEGU.WebApp.Areas.Admin.Controllers
 
             if (ModelState.IsValid)
             {
+                schedule.NextDue = DateTime.SpecifyKind(schedule.NextDue, DateTimeKind.Utc);
+
                 _context.PreventiveMaintenanceSchedules.Add(schedule);
                 await _context.SaveChangesAsync();
                 TempData["SuccessMessage"] = "Preventive maintenance schedule created successfully!";
@@ -121,6 +123,9 @@ namespace ZEGU.WebApp.Areas.Admin.Controllers
 
             if (ModelState.IsValid)
             {
+                schedule.NextDue = DateTime.SpecifyKind(schedule.NextDue, DateTimeKind.Utc);
+                schedule.CreatedAt = DateTime.SpecifyKind(schedule.CreatedAt, DateTimeKind.Utc);
+
                 _context.Update(schedule);
                 await _context.SaveChangesAsync();
                 TempData["SuccessMessage"] = "Schedule updated successfully!";
