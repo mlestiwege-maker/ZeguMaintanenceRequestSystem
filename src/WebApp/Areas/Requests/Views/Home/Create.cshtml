@@ -1,7 +1,9 @@
 @model ZEGU.WebApp.ViewModels.Requests.CreateRequestViewModel
+@inject IConfiguration Configuration
 
 @{
     ViewData["Title"] = "New Maintenance Request";
+    var maxFileSizeMb = Configuration.GetValue<int>("Uploads:MaxFileSize", 5);
 }
 
 <div class="page-header">
@@ -93,8 +95,9 @@
 
                     <div class="mb-3">
                         <label class="form-label">Photos / Documents (Optional)</label>
-                        <input asp-for="Photos" type="file" class="form-control" accept="image/*,.pdf,.doc,.docx" multiple />
-                        <small class="text-muted">You can upload multiple photos or documents (PDF, DOC, DOCX) to show the problem</small>
+                        <input asp-for="Photos" id="photosInput" type="file" class="form-control" accept="image/*,.pdf,.doc,.docx" multiple />
+                        <small class="text-muted">You can upload multiple photos or documents (PDF, DOC, DOCX), max @maxFileSizeMb MB each</small>
+                        <div id="fileSizeError" class="text-danger small mt-1" style="display:none;"></div>
                     </div>
 
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
@@ -111,6 +114,21 @@
 
 @section Scripts {
     <script>
+        const maxFileSizeBytes = @maxFileSizeMb * 1024 * 1024;
+
+        document.getElementById('photosInput').addEventListener('change', function() {
+            const errorDiv = document.getElementById('fileSizeError');
+            const oversized = Array.from(this.files).filter(f => f.size > maxFileSizeBytes);
+
+            if (oversized.length > 0) {
+                errorDiv.textContent = `${oversized.map(f => f.name).join(', ')} exceed${oversized.length === 1 ? 's' : ''} the @maxFileSizeMb MB limit and will not be uploaded. Please remove and re-select your files.`;
+                errorDiv.style.display = 'block';
+                this.value = '';
+            } else {
+                errorDiv.style.display = 'none';
+            }
+        });
+
         function resetAssetSelect() {
             const assetSelect = document.getElementById('assetSelect');
             assetSelect.disabled = true;

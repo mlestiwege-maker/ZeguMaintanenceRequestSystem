@@ -24,8 +24,9 @@ namespace ZEGU.WebApp.Areas.Works.Controllers
         private readonly EmailService _emailService;
         private readonly SmsService _smsService;
         private readonly WhatsAppService _whatsAppService;
+        private readonly IConfiguration _configuration;
 
-        public HomeController(ApplicationDbContext context, NotificationService notificationService, SLAMonitoringService slaMonitoringService, AuditService auditService, EmailService emailService, SmsService smsService, WhatsAppService whatsAppService)
+        public HomeController(ApplicationDbContext context, NotificationService notificationService, SLAMonitoringService slaMonitoringService, AuditService auditService, EmailService emailService, SmsService smsService, WhatsAppService whatsAppService, IConfiguration configuration)
         {
             _context = context;
             _notificationService = notificationService;
@@ -34,6 +35,7 @@ namespace ZEGU.WebApp.Areas.Works.Controllers
             _emailService = emailService;
             _smsService = smsService;
             _whatsAppService = whatsAppService;
+            _configuration = configuration;
         }
 
         public async Task<IActionResult> Index()
@@ -321,9 +323,10 @@ namespace ZEGU.WebApp.Areas.Works.Controllers
 
                 if (afterPhoto != null && afterPhoto.Length > 0)
                 {
-                    if (afterPhoto.Length > 5 * 1024 * 1024)
+                    var maxFileSizeMb = _configuration.GetValue<int>("Uploads:MaxFileSize", 5);
+                    if (afterPhoto.Length > maxFileSizeMb * 1024L * 1024L)
                     {
-                        TempData["ErrorMessage"] = "File size must be less than 5MB";
+                        TempData["ErrorMessage"] = $"File size must be less than {maxFileSizeMb}MB";
                         return RedirectToAction(nameof(UpdateStatus), new { id });
                     }
 

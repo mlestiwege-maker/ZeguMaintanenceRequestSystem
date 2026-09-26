@@ -158,6 +158,17 @@ builder.Services.AddControllersWithViews()
         options.HtmlHelperOptions.ClientValidationEnabled = true;
     });
 
+var maxUploadFileSizeMb = builder.Configuration.GetValue<int>("Uploads:MaxFileSize", 5);
+var maxRequestBodyBytes = maxUploadFileSizeMb * 1024L * 1024L * 10; // allows several files per submission, each capped individually in the controllers
+builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = maxRequestBodyBytes;
+});
+builder.Services.Configure<Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerOptions>(options =>
+{
+    options.Limits.MaxRequestBodySize = maxRequestBodyBytes;
+});
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {

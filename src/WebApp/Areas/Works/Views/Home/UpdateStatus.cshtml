@@ -1,7 +1,9 @@
 @model ZEGU.Core.Entities.Maintenance.MaintenanceRequest
+@inject IConfiguration Configuration
 
 @{
     ViewData["Title"] = "Update Status";
+    var maxFileSizeMb = Configuration.GetValue<int>("Uploads:MaxFileSize", 5);
 }
 
 <div class="page-header">
@@ -69,8 +71,9 @@
 
                         <div class="mb-3">
                             <label class="form-label">After Completion Photo</label>
-                            <input type="file" name="afterPhoto" class="form-control" accept="image/*" />
-                            <small class="text-muted">Upload a photo showing the completed work</small>
+                            <input type="file" name="afterPhoto" id="afterPhotoInput" class="form-control" accept="image/*" />
+                            <small class="text-muted">Upload a photo showing the completed work, max @maxFileSizeMb MB</small>
+                            <div id="afterPhotoSizeError" class="text-danger small mt-1" style="display:none;"></div>
                         </div>
                     </div>
 
@@ -91,6 +94,20 @@
         document.getElementById('statusSelect').addEventListener('change', function() {
             var completionFields = document.getElementById('completionFields');
             completionFields.style.display = this.value === '7' ? 'block' : 'none';
+        });
+
+        const maxAfterPhotoBytes = @maxFileSizeMb * 1024 * 1024;
+        document.getElementById('afterPhotoInput').addEventListener('change', function() {
+            const errorDiv = document.getElementById('afterPhotoSizeError');
+            const file = this.files[0];
+
+            if (file && file.size > maxAfterPhotoBytes) {
+                errorDiv.textContent = `${file.name} exceeds the @maxFileSizeMb MB limit and will not be uploaded. Please choose a smaller file.`;
+                errorDiv.style.display = 'block';
+                this.value = '';
+            } else {
+                errorDiv.style.display = 'none';
+            }
         });
     </script>
 }

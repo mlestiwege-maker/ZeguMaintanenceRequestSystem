@@ -21,14 +21,16 @@ namespace ZEGU.WebApp.Areas.Requests.Controllers
         private readonly EmailService _emailService;
         private readonly SmsService _smsService;
         private readonly WhatsAppService _whatsAppService;
+        private readonly IConfiguration _configuration;
 
-        public HomeController(ApplicationDbContext context, NotificationService notificationService, EmailService emailService, SmsService smsService, WhatsAppService whatsAppService)
+        public HomeController(ApplicationDbContext context, NotificationService notificationService, EmailService emailService, SmsService smsService, WhatsAppService whatsAppService, IConfiguration configuration)
         {
             _context = context;
             _notificationService = notificationService;
             _emailService = emailService;
             _smsService = smsService;
             _whatsAppService = whatsAppService;
+            _configuration = configuration;
         }
 
         public async Task<IActionResult> Index()
@@ -87,8 +89,14 @@ namespace ZEGU.WebApp.Areas.Requests.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(CreateRequestViewModel model)
+        public async Task<IActionResult> Create(CreateRequestViewModel? model)
         {
+            if (model == null)
+            {
+                TempData["ErrorMessage"] = "Your upload was too large or the request could not be read. Please try again with smaller files.";
+                return RedirectToAction(nameof(Create));
+            }
+
             if (!ModelState.IsValid)
             {
                 model.Categories = await _context.MaintenanceCategories.Where(c => c.IsActive).ToListAsync();
@@ -127,6 +135,8 @@ namespace ZEGU.WebApp.Areas.Requests.Controllers
                 if (asset != null) validatedAssetId = asset.Id;
             }
 
+            var maxFileSizeMb = _configuration.GetValue<int>("Uploads:MaxFileSize", 5);
+            var maxFileSizeBytes = maxFileSizeMb * 1024L * 1024L;
             var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".pdf", ".doc", ".docx" };
             if (model.Photos != null)
             {
@@ -134,9 +144,9 @@ namespace ZEGU.WebApp.Areas.Requests.Controllers
                 {
                     if (photo.Length == 0) continue;
 
-                    if (photo.Length > 5 * 1024 * 1024)
+                    if (photo.Length > maxFileSizeBytes)
                     {
-                        TempData["ErrorMessage"] = "File size must be less than 5MB";
+                        TempData["ErrorMessage"] = $"File size must be less than {maxFileSizeMb}MB";
                         model.Categories = await _context.MaintenanceCategories.Where(c => c.IsActive).ToListAsync();
                         model.Buildings = await _context.Buildings.Include(b => b.Campus).Where(b => b.IsActive).ToListAsync();
                         model.Departments = await _context.Departments.Where(d => d.IsActive).ToListAsync();
