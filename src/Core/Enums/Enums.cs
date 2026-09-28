@@ -86,4 +86,10 @@ namespace ZEGU.Core.Enums
         Approved = 2,
         Rejected = 3
     }
+
+    public enum PreventiveMaintenanceStatus
+    {
+        Scheduled = 1,
+        InProgress = 2
+    }
 }

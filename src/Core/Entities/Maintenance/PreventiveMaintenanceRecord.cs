@@ -13,6 +13,7 @@ namespace ZEGU.Core.Entities.Maintenance
         public string? PerformedById { get; set; }
         public ApplicationUser? PerformedBy { get; set; }
         public string WorkPerformed { get; set; } = string.Empty;
+        public DateTime? StartedAt { get; set; }
         public DateTime PerformedAt { get; set; }
         public DateTime? NextDue { get; set; }
         public string? Notes { get; set; }

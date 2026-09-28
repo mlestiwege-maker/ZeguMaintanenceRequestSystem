@@ -83,6 +83,10 @@
                                 <td data-label="Location" class="hide-mobile">@asset.Location?.RoomNumber</td>
                                 <td data-label="Status">
                                     <span class="badge status-@asset.Status?.Replace(" ", "").ToLower()">@asset.Status</span>
+                                    @if (((List<int>)ViewBag.AssetIdsUnderService).Contains(asset.Id))
+                                    {
+                                        <br /><span class="badge bg-primary mt-1"><i class="bi bi-arrow-repeat"></i> Under Service</span>
+                                    }
                                 </td>
                                 <td data-label="Condition" class="hide-mobile">
                                     @{

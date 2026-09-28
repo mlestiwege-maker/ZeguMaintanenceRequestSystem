@@ -21,6 +21,11 @@
                     @Html.AntiForgeryToken()
                     <input type="hidden" asp-for="Id" />
                     <input type="hidden" asp-for="CreatedAt" />
+                    <input type="hidden" asp-for="Status" />
+                    <input type="hidden" asp-for="StartedAt" />
+                    <input type="hidden" asp-for="StartedById" />
+                    <input type="hidden" asp-for="LastPerformed" />
+                    <input type="hidden" asp-for="LastReminderSentAt" />
 
                     <div class="mb-3">
                         <label class="form-label">Schedule Name *</label>
@@ -64,6 +69,16 @@
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Next Due Date *</label>
                             <input asp-for="NextDue" type="date" class="form-control" required />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Asset (Optional)</label>
+                            <select asp-for="AssetId" class="form-select" asp-items="ViewBag.Assets">
+                                <option value="">-- Not tied to a specific asset --</option>
+                            </select>
+                            <small class="text-muted">Link this schedule to a specific asset to track its service progress from the asset's own page.</small>
                         </div>
                     </div>
 

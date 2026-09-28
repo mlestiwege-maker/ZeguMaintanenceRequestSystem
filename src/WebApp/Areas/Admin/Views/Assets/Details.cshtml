@@ -157,6 +157,57 @@
                 }
             </div>
         </div>
+
+        @{
+            var pmSchedules = (List<ZEGU.Core.Entities.Maintenance.PreventiveMaintenanceSchedule>)ViewBag.PreventiveMaintenanceSchedules;
+        }
+        @if (pmSchedules.Any())
+        {
+            <div class="card mt-3">
+                <div class="card-header">
+                    <i class="bi bi-calendar-check"></i> Preventive Maintenance / Service Status
+                </div>
+                <div class="card-body">
+                    @foreach (var schedule in pmSchedules)
+                    {
+                        var isInProgress = schedule.Status == ZEGU.Core.Enums.PreventiveMaintenanceStatus.InProgress;
+                        var isOverdue = schedule.NextDue < DateTime.UtcNow;
+                        <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+                            <div>
+                                <a asp-controller="PreventiveMaintenance" asp-action="Details" asp-route-id="@schedule.Id"><strong>@schedule.ScheduleName</strong></a>
+                                <br />
+                                @if (isInProgress)
+                                {
+                                    <small class="text-primary">
+                                        <i class="bi bi-arrow-repeat"></i> Currently under service
+                                        @if (schedule.StartedAt.HasValue)
+                                        {
+                                            <text> since @schedule.StartedAt.Value.ToString("dd MMM yyyy HH:mm")</text>
+                                        }
+                                    </small>
+                                }
+                                else
+                                {
+                                    <small class="text-muted">Next service: @schedule.NextDue.ToString("dd MMM yyyy")</small>
+                                }
+                            </div>
+                            @if (isInProgress)
+                            {
+                                <span class="badge bg-primary">In Progress</span>
+                            }
+                            else if (isOverdue)
+                            {
+                                <span class="badge bg-danger">Overdue</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-light text-dark border">Scheduled</span>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        }
     </div>
 
     <div class="col-lg-4">

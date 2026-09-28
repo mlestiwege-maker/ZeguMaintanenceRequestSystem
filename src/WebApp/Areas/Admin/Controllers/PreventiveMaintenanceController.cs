@@ -42,6 +42,7 @@ namespace ZEGU.WebApp.Areas.Admin.Controllers
                 .Include(s => s.Location.Building)
                 .Include(s => s.Technician)
                 .ThenInclude(t => t!.User)
+                .Include(s => s.Asset)
                 .OrderBy(s => s.NextDue)
                 .ToListAsync();
 
@@ -56,6 +57,8 @@ namespace ZEGU.WebApp.Areas.Admin.Controllers
                 .ThenInclude(l => l.Building)
                 .Include(s => s.Technician)
                 .ThenInclude(t => t!.User)
+                .Include(s => s.Asset)
+                .Include(s => s.StartedBy)
                 .Include(s => s.Records)
                 .ThenInclude(r => r.PerformedBy)
                 .FirstOrDefaultAsync(s => s.Id == id);
@@ -71,6 +74,7 @@ namespace ZEGU.WebApp.Areas.Admin.Controllers
             ViewBag.Categories = new SelectList(await _context.MaintenanceCategories.Where(c => c.IsActive).ToListAsync(), "Id", "CategoryName");
             ViewBag.Locations = new SelectList(await _context.Rooms.Include(r => r.Building).Where(r => r.IsActive).ToListAsync(), "Id", "RoomNumber");
             ViewBag.Technicians = await BuildTechnicianSelectListAsync(null);
+            ViewBag.Assets = new SelectList(await _context.Assets.Where(a => a.IsActive).OrderBy(a => a.AssetName).ToListAsync(), "Id", "AssetName");
             ViewBag.Frequencies = new SelectList(new[] { "Daily", "Weekly", "BiWeekly", "Monthly", "Quarterly", "SemiAnnually", "Annually" });
             return View();
         }
@@ -95,6 +99,7 @@ namespace ZEGU.WebApp.Areas.Admin.Controllers
             ViewBag.Categories = new SelectList(await _context.MaintenanceCategories.Where(c => c.IsActive).ToListAsync(), "Id", "CategoryName", schedule.CategoryId);
             ViewBag.Locations = new SelectList(await _context.Rooms.Where(r => r.IsActive).ToListAsync(), "Id", "RoomNumber", schedule.LocationId);
             ViewBag.Technicians = await BuildTechnicianSelectListAsync(schedule.TechnicianId);
+            ViewBag.Assets = new SelectList(await _context.Assets.Where(a => a.IsActive).OrderBy(a => a.AssetName).ToListAsync(), "Id", "AssetName", schedule.AssetId);
             ViewBag.Frequencies = new SelectList(new[] { "Daily", "Weekly", "BiWeekly", "Monthly", "Quarterly", "SemiAnnually", "Annually" }, schedule.Frequency);
             return View(schedule);
         }
@@ -108,6 +113,7 @@ namespace ZEGU.WebApp.Areas.Admin.Controllers
             ViewBag.Categories = new SelectList(await _context.MaintenanceCategories.Where(c => c.IsActive).ToListAsync(), "Id", "CategoryName", schedule.CategoryId);
             ViewBag.Locations = new SelectList(await _context.Rooms.Where(r => r.IsActive).ToListAsync(), "Id", "RoomNumber", schedule.LocationId);
             ViewBag.Technicians = await BuildTechnicianSelectListAsync(schedule.TechnicianId);
+            ViewBag.Assets = new SelectList(await _context.Assets.Where(a => a.IsActive).OrderBy(a => a.AssetName).ToListAsync(), "Id", "AssetName", schedule.AssetId);
             ViewBag.Frequencies = new SelectList(new[] { "Daily", "Weekly", "BiWeekly", "Monthly", "Quarterly", "SemiAnnually", "Annually" }, schedule.Frequency);
             return View(schedule);
         }
@@ -125,6 +131,12 @@ namespace ZEGU.WebApp.Areas.Admin.Controllers
             {
                 schedule.NextDue = DateTime.SpecifyKind(schedule.NextDue, DateTimeKind.Utc);
                 schedule.CreatedAt = DateTime.SpecifyKind(schedule.CreatedAt, DateTimeKind.Utc);
+                if (schedule.LastPerformed.HasValue)
+                    schedule.LastPerformed = DateTime.SpecifyKind(schedule.LastPerformed.Value, DateTimeKind.Utc);
+                if (schedule.LastReminderSentAt.HasValue)
+                    schedule.LastReminderSentAt = DateTime.SpecifyKind(schedule.LastReminderSentAt.Value, DateTimeKind.Utc);
+                if (schedule.StartedAt.HasValue)
+                    schedule.StartedAt = DateTime.SpecifyKind(schedule.StartedAt.Value, DateTimeKind.Utc);
 
                 _context.Update(schedule);
                 await _context.SaveChangesAsync();
@@ -135,6 +147,7 @@ namespace ZEGU.WebApp.Areas.Admin.Controllers
             ViewBag.Categories = new SelectList(await _context.MaintenanceCategories.Where(c => c.IsActive).ToListAsync(), "Id", "CategoryName", schedule.CategoryId);
             ViewBag.Locations = new SelectList(await _context.Rooms.Where(r => r.IsActive).ToListAsync(), "Id", "RoomNumber", schedule.LocationId);
             ViewBag.Technicians = await BuildTechnicianSelectListAsync(schedule.TechnicianId);
+            ViewBag.Assets = new SelectList(await _context.Assets.Where(a => a.IsActive).OrderBy(a => a.AssetName).ToListAsync(), "Id", "AssetName", schedule.AssetId);
             ViewBag.Frequencies = new SelectList(new[] { "Daily", "Weekly", "BiWeekly", "Monthly", "Quarterly", "SemiAnnually", "Annually" }, schedule.Frequency);
             return View(schedule);
         }
@@ -161,6 +174,7 @@ namespace ZEGU.WebApp.Areas.Admin.Controllers
                 TechnicianId = schedule.TechnicianId,
                 PerformedById = userId,
                 WorkPerformed = workPerformed,
+                StartedAt = schedule.StartedAt,
                 PerformedAt = DateTime.UtcNow,
                 NextDue = DateTime.UtcNow.AddDays(schedule.FrequencyDays),
                 Notes = notes
@@ -169,12 +183,43 @@ namespace ZEGU.WebApp.Areas.Admin.Controllers
             _context.PreventiveMaintenanceRecords.Add(record);
             schedule.LastPerformed = DateTime.UtcNow;
             schedule.NextDue = record.NextDue.Value;
+            schedule.Status = PreventiveMaintenanceStatus.Scheduled;
+            schedule.StartedAt = null;
+            schedule.StartedById = null;
             schedule.UpdatedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
 
             TempData["SuccessMessage"] = "Maintenance record added successfully!";
             return RedirectToAction(nameof(Details), new { id = scheduleId });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> StartService(int id)
+        {
+            var schedule = await _context.PreventiveMaintenanceSchedules.FindAsync(id);
+            if (schedule == null) return NotFound();
+
+            if (schedule.Status == PreventiveMaintenanceStatus.InProgress)
+            {
+                TempData["ErrorMessage"] = "This service has already been started.";
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
+            var currentUserName = User.Identity?.Name ?? string.Empty;
+            var userId = _context.Users
+                .Where(u => u.UserName == currentUserName)
+                .Select(u => u.Id)
+                .FirstOrDefault();
+
+            schedule.Status = PreventiveMaintenanceStatus.InProgress;
+            schedule.StartedAt = DateTime.UtcNow;
+            schedule.StartedById = userId;
+            schedule.UpdatedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Service started. It's now showing as In Progress.";
+            return RedirectToAction(nameof(Details), new { id });
         }
 
         [HttpPost]

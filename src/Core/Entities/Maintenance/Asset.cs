@@ -22,5 +22,6 @@ namespace ZEGU.Core.Entities.Maintenance
         public string? QrCodePath { get; set; }
         public string? BarcodePath { get; set; }
         public ICollection<MaintenanceRequest> MaintenanceRequests { get; set; } = new List<MaintenanceRequest>();
+        public ICollection<PreventiveMaintenanceSchedule> PreventiveMaintenanceSchedules { get; set; } = new List<PreventiveMaintenanceSchedule>();
     }
 }

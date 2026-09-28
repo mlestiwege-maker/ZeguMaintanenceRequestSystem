@@ -272,6 +272,18 @@ namespace ZEGU.Infrastructure.Data
                 .OnDelete(DeleteBehavior.SetNull);
 
             builder.Entity<PreventiveMaintenanceSchedule>()
+                .HasOne(s => s.Asset)
+                .WithMany(a => a.PreventiveMaintenanceSchedules)
+                .HasForeignKey(s => s.AssetId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            builder.Entity<PreventiveMaintenanceSchedule>()
+                .HasOne(s => s.StartedBy)
+                .WithMany()
+                .HasForeignKey(s => s.StartedById)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            builder.Entity<PreventiveMaintenanceSchedule>()
                 .HasMany(s => s.Records)
                 .WithOne(r => r.Schedule)
                 .HasForeignKey(r => r.ScheduleId)

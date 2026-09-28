@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ZEGU.Core.Entities.Maintenance;
 using ZEGU.Core.Entities.Shared;
+using ZEGU.Core.Enums;
 using ZEGU.Infrastructure.Data;
 using ZEGU.WebApp.Services;
 
@@ -54,6 +55,12 @@ namespace ZEGU.WebApp.Areas.Admin.Controllers
             ViewBag.SearchString = searchString;
 
             var assets = await query.OrderByDescending(a => a.CreatedAt).ToListAsync();
+
+            ViewBag.AssetIdsUnderService = await _context.PreventiveMaintenanceSchedules
+                .Where(s => s.IsActive && s.AssetId.HasValue && s.Status == PreventiveMaintenanceStatus.InProgress)
+                .Select(s => s.AssetId!.Value)
+                .ToListAsync();
+
             return View(assets);
         }
 
@@ -69,6 +76,13 @@ namespace ZEGU.WebApp.Areas.Admin.Controllers
 
             if (asset == null)
                 return NotFound();
+
+            ViewBag.PreventiveMaintenanceSchedules = await _context.PreventiveMaintenanceSchedules
+                .Include(s => s.Technician)
+                .ThenInclude(t => t!.User)
+                .Where(s => s.AssetId == id && s.IsActive)
+                .OrderBy(s => s.NextDue)
+                .ToListAsync();
 
             return View(asset);
         }
